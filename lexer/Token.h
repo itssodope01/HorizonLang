@@ -22,6 +22,7 @@ enum class TokenType {
     STRING,
     BOOL,
     LIST,
+    VOID,
 
     // Literals
     INTEGER_LITERAL,

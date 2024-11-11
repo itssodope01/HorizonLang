@@ -22,6 +22,7 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::STRING: return "STRING";
         case TokenType::BOOL: return "BOOL";
         case TokenType::LIST: return "LIST";
+        case TokenType::VOID: return "VOID";
         case TokenType::INTEGER_LITERAL: return "INTEGER_LITERAL";
         case TokenType::FLOAT_LITERAL: return "FLOAT_LITERAL";
         case TokenType::STRING_LITERAL: return "STRING_LITERAL";

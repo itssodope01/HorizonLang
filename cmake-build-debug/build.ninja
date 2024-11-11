@@ -61,6 +61,18 @@ build CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o: CXX_COMPILER__HorizonLang_un
   OBJECT_DIR = CMakeFiles/HorizonLang.dir
   OBJECT_FILE_DIR = CMakeFiles/HorizonLang.dir/lexer
 
+build CMakeFiles/HorizonLang.dir/parser/Parser.cpp.o: CXX_COMPILER__HorizonLang_unscanned_Debug /home/itssodope/CLionProjects/HorizonLang/parser/Parser.cpp || cmake_object_order_depends_target_HorizonLang
+  DEP_FILE = CMakeFiles/HorizonLang.dir/parser/Parser.cpp.o.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles/HorizonLang.dir
+  OBJECT_FILE_DIR = CMakeFiles/HorizonLang.dir/parser
+
+build CMakeFiles/HorizonLang.dir/ast/ASTprint.cpp.o: CXX_COMPILER__HorizonLang_unscanned_Debug /home/itssodope/CLionProjects/HorizonLang/ast/ASTprint.cpp || cmake_object_order_depends_target_HorizonLang
+  DEP_FILE = CMakeFiles/HorizonLang.dir/ast/ASTprint.cpp.o.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles/HorizonLang.dir
+  OBJECT_FILE_DIR = CMakeFiles/HorizonLang.dir/ast
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target HorizonLang
@@ -69,7 +81,7 @@ build CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o: CXX_COMPILER__HorizonLang_un
 #############################################
 # Link the executable HorizonLang
 
-build HorizonLang: CXX_EXECUTABLE_LINKER__HorizonLang_Debug CMakeFiles/HorizonLang.dir/main.cpp.o CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o
+build HorizonLang: CXX_EXECUTABLE_LINKER__HorizonLang_Debug CMakeFiles/HorizonLang.dir/main.cpp.o CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o CMakeFiles/HorizonLang.dir/parser/Parser.cpp.o CMakeFiles/HorizonLang.dir/ast/ASTprint.cpp.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/HorizonLang.dir
   POST_BUILD = :

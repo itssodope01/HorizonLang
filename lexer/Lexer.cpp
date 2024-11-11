@@ -16,6 +16,7 @@ std::unordered_map<std::string, TokenType> Lexer::keywords = {
     {"float", TokenType::FLOAT},
     {"string", TokenType::STRING},
     {"bool", TokenType::BOOL},
+    {"void", TokenType::VOID},
     {"list", TokenType::LIST},
     {"and", TokenType::AND},
     {"or", TokenType::OR},
@@ -98,7 +99,7 @@ std::vector<Token> Lexer::tokenize() {
         }
     }
 
-    tokens.push_back(Token(TokenType::END_OF_FILE, "", line, column));
+    tokens.emplace_back(Token(TokenType::END_OF_FILE, "", line, column));
     return tokens;
 }
 
@@ -185,9 +186,10 @@ void Lexer::skipMultiLineComment() {
 Token Lexer::handleNumber() {
     while (isDigit(peek())) advance();
 
-    // Look for decimal part
+    // Look for a fractional part
     if (peek() == '.' && isDigit(peekNext())) {
-        advance(); // Consume the dot
+        advance(); // Consume '.'
+
         while (isDigit(peek())) advance();
         return makeToken(TokenType::FLOAT_LITERAL);
     }
@@ -197,6 +199,10 @@ Token Lexer::handleNumber() {
 
 Token Lexer::handleString() {
     while (peek() != '"' && !isAtEnd()) {
+        if (peek() == '\n') {
+            line++;
+            column = 1;
+        }
         advance();
     }
 
@@ -206,7 +212,7 @@ Token Lexer::handleString() {
         return makeToken(TokenType::INVALID); // Unterminated string
     }
 
-    advance(); // Consume the closing quote
+    advance();
     return makeToken(TokenType::STRING_LITERAL);
 }
 

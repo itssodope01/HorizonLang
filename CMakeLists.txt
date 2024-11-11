@@ -7,4 +7,10 @@ add_executable(HorizonLang main.cpp
         lexer/Token.h
         lexer/Lexer.h
         lexer/Lexer.cpp
-        lexer/Token_Utils.h)
+        lexer/Token_Utils.h
+        ast/AST.h
+        parser/Parser.h
+        parser/Parser.cpp
+        ast/ASTprint.cpp
+        ast/ASTprint.h
+)
