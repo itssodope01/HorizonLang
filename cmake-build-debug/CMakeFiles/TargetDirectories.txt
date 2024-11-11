@@ -1,0 +1,3 @@
+/home/itssodope/CLionProjects/HorizonLang/cmake-build-debug/CMakeFiles/HorizonLang.dir
+/home/itssodope/CLionProjects/HorizonLang/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/itssodope/CLionProjects/HorizonLang/cmake-build-debug/CMakeFiles/rebuild_cache.dir

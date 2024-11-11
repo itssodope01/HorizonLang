@@ -1,0 +1,19 @@
+# ninja log v6
+0	327	1731281155009351073	CMakeFiles/HorizonLang.dir/main.cpp.o	dd3742669ded3ec9
+1	429	1731281447259371494	CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o	deaa2b53c343f0b
+429	468	1731281447687371550	HorizonLang	4a412ef054e3da20
+1	331	1731281970219402733	CMakeFiles/HorizonLang.dir/main.cpp.o	dd3742669ded3ec9
+331	373	1731281970549402735	HorizonLang	4a412ef054e3da20
+1	423	1731282100602402744	CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o	deaa2b53c343f0b
+423	464	1731282101024402741	HorizonLang	4a412ef054e3da20
+1	420	1731284482603052723	CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o	deaa2b53c343f0b
+420	461	1731284483022052996	HorizonLang	4a412ef054e3da20
+1	430	1731284547660093704	CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o	deaa2b53c343f0b
+430	470	1731284548089093965	HorizonLang	4a412ef054e3da20
+1	428	1731284700516180761	CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o	deaa2b53c343f0b
+429	470	1731284700944180989	HorizonLang	4a412ef054e3da20
+1	331	1731285144206384391	CMakeFiles/HorizonLang.dir/main.cpp.o	dd3742669ded3ec9
+1	477	1731285144206384391	CMakeFiles/HorizonLang.dir/lexer/Lexer.cpp.o	deaa2b53c343f0b
+477	520	1731285144682384583	HorizonLang	4a412ef054e3da20
+1	338	1731285314715450933	CMakeFiles/HorizonLang.dir/main.cpp.o	dd3742669ded3ec9
+338	380	1731285315052451061	HorizonLang	4a412ef054e3da20
