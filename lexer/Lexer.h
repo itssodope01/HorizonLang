@@ -15,7 +15,7 @@ private:
     int start = 0;
     int line = 1;
     int column = 1;
-    int tokenColumn = 1; // Added to track the starting column of each token
+    int tokenColumn = 1;
 
     static std::unordered_map<std::string, TokenType> keywords;
 
@@ -26,7 +26,8 @@ private:
     bool match(char expected);
 
     void skipWhitespace();
-    void handleComment();
+    void skipSingleLineComment();
+    void skipMultiLineComment();
     Token handleNumber();
     Token handleString();
     Token handleIdentifier();

@@ -22,7 +22,8 @@ std::unordered_map<std::string, TokenType> Lexer::keywords = {
     {"not", TokenType::NOT},
     {"true", TokenType::BOOL_LITERAL},
     {"false", TokenType::BOOL_LITERAL},
-    {"print", TokenType::PRINT} // Added 'print' to keywords
+    {"print", TokenType::PRINT},
+    {"input", TokenType::INPUT}
 };
 
 Lexer::Lexer(std::string source) : source(std::move(source)) {}
@@ -32,7 +33,7 @@ std::vector<Token> Lexer::tokenize() {
 
     while (!isAtEnd()) {
         start = current;
-        tokenColumn = column; // Store the starting column
+        tokenColumn = column;
 
         skipWhitespace();
         if (isAtEnd()) break;
@@ -66,19 +67,15 @@ std::vector<Token> Lexer::tokenize() {
             case '-': tokens.push_back(makeToken(TokenType::MINUS)); break;
             case '*': tokens.push_back(makeToken(TokenType::MULTIPLY)); break;
             case '/':
-                if (match('/')) {
-                    // Single-line comment
-                    handleComment();
-                } else if (match('*')) {
-                    // Multi-line comment
-                    handleComment();
+                if (match('*')) {
+                    skipMultiLineComment();
                 } else {
                     tokens.push_back(makeToken(TokenType::DIVIDE));
                 }
                 break;
             case '#':
                 // Handle comments starting with '#'
-                handleComment();
+                skipSingleLineComment();
                 break;
             case '%': tokens.push_back(makeToken(TokenType::MODULO)); break;
             case '=':
@@ -105,7 +102,7 @@ std::vector<Token> Lexer::tokenize() {
     return tokens;
 }
 
-// Helper methods implementation...
+// Helper methods
 bool Lexer::isAtEnd() const {
     return current >= source.length();
 }
@@ -163,31 +160,23 @@ void Lexer::skipWhitespace() {
     }
 }
 
-void Lexer::handleComment() {
-    char c = source[current - 1]; // Get the character that triggered handleComment
-    if (c == '/') {
-        if (source[current - 2] == '/') {
-            // Single-line comment starting with //
-            while (peek() != '\n' && !isAtEnd()) {
-                advance();
+void Lexer::skipSingleLineComment() {
+    while (peek() != '\n' && !isAtEnd()) {
+        advance();
+    }
+}
+
+void Lexer::skipMultiLineComment() {
+    while (!isAtEnd()) {
+        if (peek() == '*' && peekNext() == '/') {
+            advance(); // Consume '*'
+            advance(); // Consume '/'
+            break;
+        } else {
+            if (peek() == '\n') {
+                line++;
+                column = 1;
             }
-        } else if (source[current - 2] == '*') {
-            // Multi-line comment starting with /* and ending with */
-            while (!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
-                if (peek() == '\n') {
-                    advance(); // Newline handling in advance()
-                } else {
-                    advance();
-                }
-            }
-            if (!isAtEnd()) {
-                advance(); // Consume '*'
-                advance(); // Consume '/'
-            }
-        }
-    } else if (c == '#') {
-        // Comment starting with '#'
-        while (peek() != '\n' && !isAtEnd()) {
             advance();
         }
     }

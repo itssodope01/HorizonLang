@@ -15,7 +15,8 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::RETURN: return "RETURN";
         case TokenType::CONST: return "CONST";
         case TokenType::FX: return "FX";
-        case TokenType::PRINT: return "PRINT"; // Added 'PRINT' token type
+        case TokenType::PRINT: return "PRINT";
+        case TokenType::INPUT: return "INPUT";
         case TokenType::INT: return "INT";
         case TokenType::FLOAT: return "FLOAT";
         case TokenType::STRING: return "STRING";

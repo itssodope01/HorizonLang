@@ -13,7 +13,8 @@ enum class TokenType {
     RETURN,
     CONST,
     FX,     // Function definition
-    PRINT,  // Added 'print' keyword
+    PRINT,
+    INPUT,
 
     // Types
     INT,
