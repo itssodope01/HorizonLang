@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ast/AST.h"
+#include "../../ast/AST.h"
 #include <sstream>
 #include <unordered_map>
 #include <functional>

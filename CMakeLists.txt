@@ -13,4 +13,12 @@ add_executable(HorizonLang main.cpp
         parser/Parser.cpp
         ast/ASTprint.cpp
         ast/ASTprint.h
+        semantic/SemanticAnalyzer.h
+        semantic/SemanticAnalyzer.cpp
+        codegen/Python/PythonCodegen.h
+        codegen/Python/PythonCodegen.cpp
+        codegen/CPP/CppCodeGen.h
+        codegen/CPP/CppCodeGen.cpp
 )
+add_executable(output_executable output.cpp)
+

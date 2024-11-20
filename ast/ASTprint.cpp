@@ -10,7 +10,7 @@ namespace ASTPrinter {
         }
     }
 
-    static std::string typeKindToString(Type::Kind kind) {
+     std::string typeKindToString(Type::Kind kind) {
         switch (kind) {
             case Type::Kind::INT: return "int";
             case Type::Kind::FLOAT: return "float";
@@ -20,6 +20,18 @@ namespace ASTPrinter {
             case Type::Kind::VOID: return "void";
             default: return "unknown";
         }
+    }
+
+    // New helper function to convert TypePtr to string
+    static std::string typeToString(const TypePtr& type) {
+        if (!type) {
+            return "null";
+        }
+        std::string result = typeKindToString(type->kind);
+        if (type->kind == Type::Kind::LIST && type->elementType) {
+            result += "<" + typeToString(type->elementType) + ">";
+        }
+        return result;
     }
 
     static std::string binaryOperatorToString(BinaryOp::Operator op) {
@@ -65,7 +77,11 @@ namespace ASTPrinter {
             std::cout << "Parameters:" << std::endl;
             for (const auto& param : func->parameters) {
                 printIndent(indent + 2);
-                std::cout << param.second << " : " << typeKindToString(param.first->kind) << std::endl;
+                std::cout << param.second << " : " << typeToString(param.first) << std::endl;
+            }
+            if (func->returnType) {
+                printIndent(indent + 1);
+                std::cout << "Return Type: " << typeToString(func->returnType) << std::endl;
             }
             printIndent(indent + 1);
             std::cout << "Body:" << std::endl;
@@ -75,7 +91,7 @@ namespace ASTPrinter {
         } else if (auto varDecl = std::dynamic_pointer_cast<VarDecl>(node)) {
             printIndent(indent);
             std::cout << (varDecl->isConst ? "Const " : "Var ") << varDecl->name
-                      << " : " << typeKindToString(varDecl->type->kind) << std::endl;
+                      << " : " << typeToString(varDecl->type) << std::endl;
             if (varDecl->initializer) {
                 printIndent(indent + 1);
                 std::cout << "Initializer:" << std::endl;
@@ -139,6 +155,16 @@ namespace ASTPrinter {
             for (const auto& stmt : ifStmt->thenBlock) {
                 printAST(stmt, indent + 2);
             }
+            for (const auto& [elifCond, elifBody] : ifStmt->elifBlocks) {
+                printIndent(indent + 1);
+                std::cout << "Else If Condition:" << std::endl;
+                printAST(elifCond, indent + 2);
+                printIndent(indent + 1);
+                std::cout << "Else If Body:" << std::endl;
+                for (const auto& stmt : elifBody) {
+                    printAST(stmt, indent + 2);
+                }
+            }
             if (!ifStmt->elseBlock.empty()) {
                 printIndent(indent + 1);
                 std::cout << "Else Branch:" << std::endl;
@@ -152,7 +178,11 @@ namespace ASTPrinter {
             printAST(exprStmt->expression, indent + 1);
         } else if (auto funcCall = std::dynamic_pointer_cast<FunctionCall>(node)) {
             printIndent(indent);
-            std::cout << "Function Call" << std::endl;
+            std::cout << "Function Call";
+            if (funcCall->type) {
+                std::cout << " (type: " << typeToString(funcCall->type) << ")";
+            }
+            std::cout << std::endl;
             printIndent(indent + 1);
             std::cout << "Callee:" << std::endl;
             printAST(funcCall->callee, indent + 2);
@@ -163,12 +193,16 @@ namespace ASTPrinter {
             }
         } else if (auto ident = std::dynamic_pointer_cast<Identifier>(node)) {
             printIndent(indent);
-            std::cout << "Identifier: " << ident->name << std::endl;
+            std::cout << "Identifier: " << ident->name;
+            if (ident->type) {
+                std::cout << " (type: " << typeToString(ident->type) << ")";
+            }
+            std::cout << std::endl;
         } else if (auto literal = std::dynamic_pointer_cast<Literal>(node)) {
             printIndent(indent);
             std::cout << "Literal: ";
 
-            // Updated lambda function to handle different types
+            // Handle different literal types
             std::visit([&](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, std::vector<ExprPtr>>) {
@@ -183,10 +217,18 @@ namespace ASTPrinter {
                 }
             }, literal->value);
 
+            if (literal->type) {
+                std::cout << " (type: " << typeToString(literal->type) << ")";
+            }
+
             std::cout << std::endl;
         } else if (auto binaryOp = std::dynamic_pointer_cast<BinaryOp>(node)) {
             printIndent(indent);
-            std::cout << "Binary Operation: " << binaryOperatorToString(binaryOp->op) << std::endl;
+            std::cout << "Binary Operation: " << binaryOperatorToString(binaryOp->op);
+            if (binaryOp->type) {
+                std::cout << " (type: " << typeToString(binaryOp->type) << ")";
+            }
+            std::cout << std::endl;
             printIndent(indent + 1);
             std::cout << "Left:" << std::endl;
             printAST(binaryOp->left, indent + 2);
@@ -195,13 +237,21 @@ namespace ASTPrinter {
             printAST(binaryOp->right, indent + 2);
         } else if (auto unaryOp = std::dynamic_pointer_cast<UnaryOp>(node)) {
             printIndent(indent);
-            std::cout << "Unary Operation: " << unaryOperatorToString(unaryOp->op) << std::endl;
+            std::cout << "Unary Operation: " << unaryOperatorToString(unaryOp->op);
+            if (unaryOp->type) {
+                std::cout << " (type: " << typeToString(unaryOp->type) << ")";
+            }
+            std::cout << std::endl;
             printIndent(indent + 1);
             std::cout << "Operand:" << std::endl;
             printAST(unaryOp->operand, indent + 2);
         } else if (auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(node)) {
             printIndent(indent);
-            std::cout << "Member Access" << std::endl;
+            std::cout << "Member Access";
+            if (memberAccess->type) {
+                std::cout << " (type: " << typeToString(memberAccess->type) << ")";
+            }
+            std::cout << std::endl;
             printIndent(indent + 1);
             std::cout << "Object:" << std::endl;
             printAST(memberAccess->object, indent + 2);
@@ -209,7 +259,11 @@ namespace ASTPrinter {
             std::cout << "Member Name: " << memberAccess->memberName << std::endl;
         } else if (auto listAccess = std::dynamic_pointer_cast<ListAccess>(node)) {
             printIndent(indent);
-            std::cout << "List Access" << std::endl;
+            std::cout << "List Access";
+            if (listAccess->type) {
+                std::cout << " (type: " << typeToString(listAccess->type) << ")";
+            }
+            std::cout << std::endl;
             printIndent(indent + 1);
             std::cout << "List:" << std::endl;
             printAST(listAccess->list, indent + 2);
@@ -242,7 +296,16 @@ namespace ASTPrinter {
                 std::cout << "Value:" << std::endl;
                 printAST(returnStmt->value, indent + 2);
             }
-        } else {
+        } else if (auto terminateStmt = std::dynamic_pointer_cast<ENDLOOP>(node)) {
+            printIndent(indent);
+            std::cout << "EndLoop Statement" << std::endl;
+        }
+
+        else if (auto skipitStmt = std::dynamic_pointer_cast<NEXT>(node)) {
+            printIndent(indent);
+            std::cout << "Next Statement" << std::endl;
+        }
+        else {
             printIndent(indent);
             std::cout << "Unknown node type" << std::endl;
         }

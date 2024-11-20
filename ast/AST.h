@@ -44,6 +44,7 @@ public:
 class Expression : public ASTNode {
 public:
     virtual ~Expression() = default;
+    TypePtr type;
 };
 
 class Literal : public Expression {
@@ -151,8 +152,8 @@ public:
 
 class Assignment : public Expression {
 public:
-    ExprPtr target;  // The left-hand side
-    ExprPtr value;   // The right-hand side
+    ExprPtr target;
+    ExprPtr value;
 
     Assignment(ExprPtr t, ExprPtr v)
         : target(std::move(t)), value(std::move(v)) {}
@@ -249,3 +250,14 @@ public:
     explicit Program(std::vector<StmtPtr> stmts)
         : statements(std::move(stmts)) {}
 };
+
+class ENDLOOP : public Statement {
+public:
+    ENDLOOP() = default;
+};
+
+class NEXT : public Statement {
+public:
+    NEXT() = default;
+};
+

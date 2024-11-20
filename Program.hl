@@ -1,0 +1,6 @@
+fx hello ( string name ) {
+    print("Hello, " + name + " !");
+}
+
+string name = input("Enter your name!");
+hello(name);

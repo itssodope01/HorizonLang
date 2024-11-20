@@ -55,9 +55,15 @@ void Parser::synchronize() {
 
 StmtPtr Parser::declaration() {
     if (match(TokenType::FX)) return functionDeclaration();
-    if (check(TokenType::CONST) || isType()) return varDeclaration();
+
+
+    if (check(TokenType::CONST) || (isType() && checkNext(TokenType::IDENTIFIER))) {
+        return varDeclaration();
+    }
+
     return statement();
 }
+
 
 bool Parser::isType() {
     return check(TokenType::INT) || check(TokenType::FLOAT) ||
@@ -107,6 +113,8 @@ StmtPtr Parser::statement() {
     if (match(TokenType::FOR)) return forStatement();
     if (match(TokenType::TRY)) return tryCatchStatement();
     if (match(TokenType::RETURN)) return returnStatement();
+    if (match(TokenType::ENDLOOP)) return EndLoopStatement();
+    if (match(TokenType::NEXT)) return NextStatement();
     return expressionStatement();
 }
 
@@ -150,7 +158,7 @@ StmtPtr Parser::ifStatement() {
     std::vector<std::pair<ExprPtr, std::vector<StmtPtr>>> elifBlocks;
     std::vector<StmtPtr> elseBlock;
 
-    while (match(TokenType::ELIF)) {
+    while (match(TokenType::ELSEIF)) {
         consume(TokenType::LPAREN, "Expect '(' after 'elif'.");
         ExprPtr elifCondition = expression();
         consume(TokenType::RPAREN, "Expect ')' after elif condition.");
@@ -228,12 +236,12 @@ StmtPtr Parser::listOrStringOperation(const std::string& name) {
     consume(TokenType::RPAREN, "Expect ')' after arguments.");
     consume(TokenType::SEMICOLON, "Expect ';' after operation.");
 
-    // Create the method call as a FunctionCall expression
+
     ExprPtr object = std::make_shared<Identifier>(name);
     ExprPtr callee = std::make_shared<MemberAccess>(object, op.lexeme);
     ExprPtr funcCall = std::make_shared<FunctionCall>(callee, args);
 
-    // Wrap in an ExpressionStatement
+
     return std::make_shared<ExpressionStatement>(funcCall);
 }
 
@@ -262,7 +270,7 @@ ExprPtr Parser::assignment() {
 
     if (match(TokenType::ASSIGN)) {
         Token equals = previous();
-        ExprPtr value = assignment(); // Recursively parse the right-hand side
+        ExprPtr value = assignment();
 
 
         if (auto var = std::dynamic_pointer_cast<Identifier>(expr)) {
@@ -293,6 +301,25 @@ StmtPtr Parser::functionCallStatement(const std::string& name) {
     ExprPtr funcCall = std::make_shared<FunctionCall>(std::make_shared<Identifier>(name), arguments);
     return std::make_shared<ExpressionStatement>(funcCall);
 }
+
+StmtPtr Parser::EndLoopStatement() {
+    Token EndLoopToken = previous();
+    consume(TokenType::SEMICOLON, "Expect ';' after 'next'.");
+    auto nextStmt = std::make_shared<ENDLOOP>();
+    nextStmt->line = EndLoopToken.line;
+    nextStmt->column = EndLoopToken.column;
+    return nextStmt;
+}
+
+StmtPtr Parser::NextStatement() {
+    Token skipitToken = previous();
+    consume(TokenType::SEMICOLON, "Expect ';' after 'next'.");
+    auto skipitStmt = std::make_shared<NEXT>();
+    skipitStmt->line = skipitToken.line;
+    skipitStmt->column = skipitToken.column;
+    return skipitStmt;
+}
+
 
 std::vector<StmtPtr> Parser::block() {
     std::vector<StmtPtr> statements;
@@ -524,10 +551,15 @@ TypePtr Parser::parseType() {
     if (match(TokenType::BOOL)) return std::make_shared<Type>(Type::Kind::BOOL);
     if (match(TokenType::LIST)) {
         consume(TokenType::LESS_THAN, "Expect '<' after 'list'.");
-        TypePtr elementType = parseType();
+
+        TypePtr elementType = nullptr;
+        // Check for the '>' immediately after '<' to allow for mixed-type lists
+        if (!check(TokenType::GREATER_THAN)) {
+            elementType = parseType();  // parse the element type if specified
+        }
+
         consume(TokenType::GREATER_THAN, "Expect '>' after list element type.");
-        auto type = std::make_shared<Type>(Type::Kind::LIST);
-        type->elementType = elementType;
+        auto type = std::make_shared<Type>(Type::Kind::LIST, elementType);
         return type;
     }
 
@@ -572,4 +604,9 @@ Token Parser::consume(TokenType type, const std::string& message) {
     } else {
         throw ParseError(message, peek());
     }
+}
+
+bool Parser::checkNext(TokenType type) const {
+    if (current + 1 >= tokens.size()) return false;
+    return tokens[current + 1].type == type;
 }

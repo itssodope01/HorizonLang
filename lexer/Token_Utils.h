@@ -7,7 +7,7 @@ std::string tokenTypeToString(TokenType type) {
     switch (type) {
         case TokenType::IF: return "IF";
         case TokenType::ELSE: return "ELSE";
-        case TokenType::ELIF: return "ELIF";
+        case TokenType::ELSEIF: return "ELSEIF";
         case TokenType::WHILE: return "WHILE";
         case TokenType::FOR: return "FOR";
         case TokenType::TRY: return "TRY";
@@ -54,6 +54,8 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::IDENTIFIER: return "IDENTIFIER";
         case TokenType::COMMENT: return "COMMENT";
         case TokenType::END_OF_FILE: return "END_OF_FILE";
+        case TokenType::NEXT: return "NEXT";
+        case TokenType::ENDLOOP: return "ENDLOOP";
         case TokenType::INVALID: return "INVALID";
         default: return "UNKNOWN";
     }

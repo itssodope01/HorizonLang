@@ -34,6 +34,9 @@ private:
     bool match(TokenType type);
     bool isAtEnd() const;
     Token consume(TokenType type, const std::string& message);
+
+    bool checkNext(TokenType type) const;
+
     void synchronize();
     bool isType();
 
@@ -60,6 +63,10 @@ private:
     ExprPtr assignment();
 
     StmtPtr functionCallStatement(const std::string& name);
+
+    StmtPtr EndLoopStatement();
+
+    StmtPtr NextStatement();
 
     ExprPtr expression();
     ExprPtr logicalOr();

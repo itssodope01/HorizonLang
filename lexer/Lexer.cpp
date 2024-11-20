@@ -4,7 +4,7 @@
 std::unordered_map<std::string, TokenType> Lexer::keywords = {
     {"if", TokenType::IF},
     {"else", TokenType::ELSE},
-    {"elif", TokenType::ELIF},
+    {"elseif", TokenType::ELSEIF},
     {"while", TokenType::WHILE},
     {"for", TokenType::FOR},
     {"try", TokenType::TRY},
@@ -24,7 +24,9 @@ std::unordered_map<std::string, TokenType> Lexer::keywords = {
     {"true", TokenType::BOOL_LITERAL},
     {"false", TokenType::BOOL_LITERAL},
     {"print", TokenType::PRINT},
-    {"input", TokenType::INPUT}
+    {"input", TokenType::INPUT},
+    {"endloop", TokenType::ENDLOOP},
+    {"next", TokenType::NEXT}
 };
 
 Lexer::Lexer(std::string source) : source(std::move(source)) {}
@@ -68,14 +70,14 @@ std::vector<Token> Lexer::tokenize() {
             case '-': tokens.push_back(makeToken(TokenType::MINUS)); break;
             case '*': tokens.push_back(makeToken(TokenType::MULTIPLY)); break;
             case '/':
-                if (match('*')) {
+                if (match('@')) {
                     skipMultiLineComment();
                 } else {
                     tokens.push_back(makeToken(TokenType::DIVIDE));
                 }
                 break;
-            case '#':
-                // Handle comments starting with '#'
+            case '@':
+                // comments starting with '@'
                 skipSingleLineComment();
                 break;
             case '%': tokens.push_back(makeToken(TokenType::MODULO)); break;
@@ -103,7 +105,6 @@ std::vector<Token> Lexer::tokenize() {
     return tokens;
 }
 
-// Helper methods
 bool Lexer::isAtEnd() const {
     return current >= source.length();
 }
@@ -169,8 +170,8 @@ void Lexer::skipSingleLineComment() {
 
 void Lexer::skipMultiLineComment() {
     while (!isAtEnd()) {
-        if (peek() == '*' && peekNext() == '/') {
-            advance(); // Consume '*'
+        if (peek() == '@' && peekNext() == '/') {
+            advance(); // Consume '@'
             advance(); // Consume '/'
             break;
         } else {
@@ -186,9 +187,9 @@ void Lexer::skipMultiLineComment() {
 Token Lexer::handleNumber() {
     while (isDigit(peek())) advance();
 
-    // Look for a fractional part
+
     if (peek() == '.' && isDigit(peekNext())) {
-        advance(); // Consume '.'
+        advance();
 
         while (isDigit(peek())) advance();
         return makeToken(TokenType::FLOAT_LITERAL);

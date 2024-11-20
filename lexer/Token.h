@@ -5,7 +5,7 @@ enum class TokenType {
     // Keywords
     IF,
     ELSE,
-    ELIF,
+    ELSEIF,
     WHILE,
     FOR,
     TRY,
@@ -15,6 +15,10 @@ enum class TokenType {
     FX,     // Function definition
     PRINT,
     INPUT,
+
+
+    ENDLOOP, // Break
+    NEXT,  // Continue
 
     // Types
     INT,
