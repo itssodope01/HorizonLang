@@ -102,7 +102,7 @@ Here’s an example of compiling and running a Horizon Lang program:
 1. Create a program `examples/example.hl`:
 
    ```horizon
-   fx main() -> void {
+   fx main() {
        int x = 10;
        print("Value of x: " + STR(x));
    }
