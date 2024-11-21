@@ -1,0 +1,29 @@
+/@ Program to sort a list of integers using Bubble Sort @/
+
+fx bubble_sort(list<int> numbers) {
+    int n = numbers.length();
+    for (i, 0, n - 1) { @ Outer loop
+        for (j, 0, n - 2) { @ Inner loop
+            if (numbers[j] > numbers[j + 1]) {
+                int temp = numbers[j];
+                numbers[j] = numbers[j + 1];
+                numbers[j + 1] = temp;
+            }
+        }
+    }
+    return numbers;
+}
+
+list<int> numbers = [64, 25, 34, 12, 22, 42, 11, 90];
+
+print("Original List:");
+for (i, 0, numbers.length() - 1) {
+    print(numbers[i]);
+}
+
+list<int> sorted_numbers = bubble_sort(numbers);
+
+print("Sorted List:");
+for (i, 0, sorted_numbers.length() - 1) {
+    print(sorted_numbers[i]);
+}

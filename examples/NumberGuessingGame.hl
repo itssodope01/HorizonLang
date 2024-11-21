@@ -1,0 +1,33 @@
+/@ A number guessing game showcasing conditions, loops, and functions @/
+
+fx get_random(int start, int end) {
+    string seed = input("Enter any number for randomness seed: ");
+    int seed_length = seed.length();
+    int range = end - start + 1;
+    int random_number = start + (seed_length % range);
+    return random_number;
+}
+
+print("Welcome to the Number Guessing Game!");
+
+const int MIN = 1;
+const int MAX = 100;
+int secret_number = get_random(MIN, MAX);
+int attempts = 0;
+
+while (true) {
+    print("Guess a number between " + STR(MIN) + " and " + STR(MAX) + ": ");
+    string g = input("");
+    int guess = INT(g);
+    attempts = attempts + 1;
+
+    if (guess < secret_number) {
+        print("Too low! Try again.");
+    } elseif (guess > secret_number) {
+        print("Too high! Try again.");
+    } else {
+        print("Congratulations! You've guessed the number!");
+        print("Total attempts: " + STR(attempts));
+        endloop;
+    }
+}

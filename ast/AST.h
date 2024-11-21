@@ -150,7 +150,7 @@ public:
           initializer(std::move(init)) {}
 };
 
-class Assignment : public Expression {
+class Assignment : public Statement, public Expression {
 public:
     ExprPtr target;
     ExprPtr value;

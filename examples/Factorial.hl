@@ -1,0 +1,20 @@
+fx factorial(int n) {
+    int result = 1;
+    list<int> stack = []; @ Simulate call stack
+    stack.append(n);
+
+    while (stack.length() > 0) {
+        int current = stack[stack.length() - 1]; @ Peek the top
+        stack.remove(stack.length() - 1); @ Pop the top
+
+        if (current > 1) {
+            result = result * current;
+            stack.append(current - 1); @ Simulate recursive call with current - 1
+        }
+    }
+    return result;
+}
+
+int n = INT(input("Enter number to know its Factorial: "));
+int fact = factorial(n);
+print("Factorial of " + STR(n) + " is " + STR(fact));

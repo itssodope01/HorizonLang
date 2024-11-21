@@ -1,0 +1,46 @@
+/@ Selection Sort Algorithm with User Input @/
+
+fx selection_sort(list<int> numbers) {
+    int n = numbers.length();
+    for (i, 0, n ) {
+        int min_index = i;
+        for (j, i + 1, n) {
+            if (numbers[j] < numbers[min_index]) {
+                min_index = j;
+            }
+        }
+        @ Swap numbers[i] and numbers[min_index]
+        int temp = numbers[i];
+        numbers[i] = numbers[min_index];
+        numbers[min_index] = temp;
+    }
+    return numbers;
+}
+
+@ Main Program @
+fx main() {
+    @ Input the size of the list
+    int size = INT(input("Enter the number of elements in the list: "));
+    list<int> numbers = [];
+
+    @ Populate the list with user inputs
+    for (i, 1, size + 1) {
+        int element = INT(input("Enter element " + STR(i) + ": "));
+        numbers.append(element);
+    }
+
+    print("Original List:");
+    for (i, 0, numbers.length()) {
+        print(numbers[i]);
+    }
+
+    @ Sort the list using selection sort
+    list<int> sorted_numbers = selection_sort(numbers);
+
+    print("Sorted List:");
+    for (i, 0, sorted_numbers.length()) {
+        print(sorted_numbers[i]);
+    }
+}
+
+main();

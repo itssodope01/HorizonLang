@@ -1,0 +1,28 @@
+/@ Fibonacci Series Generator @/
+
+fx generate_fibonacci(int n) {
+    if (n <= 0) {
+        print("Please enter a positive number.");
+        return;
+    }
+
+    int a = 0;
+    int b = 1;
+    int temp;
+
+    print("Fibonacci Series:");
+    for (i, 1, (n+1)) {
+        print(STR(a));
+        temp = b;
+        b = a + b;
+        a = temp;
+    }
+}
+
+@ Main Program
+fx main () {
+    int num_terms = INT(input("Enter the number of terms for Fibonacci series: "));
+    generate_fibonacci(num_terms);
+}
+
+main();

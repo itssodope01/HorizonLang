@@ -3,8 +3,10 @@
 #include "../../ast/AST.h"
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <functional>
 #include <string>
+#include <set>
 
 class PythonCodeGen {
 private:
@@ -14,6 +16,9 @@ private:
 
     // Cache for variable types
     std::unordered_map<std::string, TypePtr> variableTypes;
+
+    // Set of global variables
+    std::set<std::string> globalVariables;
 
     // Helper methods
     void indent();
@@ -47,12 +52,19 @@ private:
     // Standard library mapping
     static const std::unordered_map<std::string, std::string> builtinFunctions;
 
+    // Helper to collect assigned variables
+    void collectAssignedVariables(const StmtPtr& stmt, std::set<std::string>& assignedVars);
+    void collectAssignedVariables(const ExprPtr& expr, std::set<std::string>& assignedVars);
+
+    // Flag to indicate if we are inside a function
+    bool inFunction = false;
+
 public:
     PythonCodeGen() = default;
 
     // Main generation method
     std::string generate(const std::shared_ptr<Program>& program);
 
-    // Helper for writing the generated code to a file
+
     void writeToFile(const std::string& filename, const std::string& code);
 };

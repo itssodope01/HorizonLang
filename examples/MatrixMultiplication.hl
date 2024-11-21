@@ -1,0 +1,59 @@
+/@ Matrix multiplication showcasing flattened lists and simulated 2D indexing with formatted output @/
+
+fx multiply_matrices(list<int> matrix_a, list<int> matrix_b, int rows_a, int cols_a, int cols_b) {
+    list<int> result = [];
+    for (i, 0, rows_a) { @ Looping through rows of Matrix A
+        for (j, 0, cols_b) { @ Looping through columns of Matrix B
+            int sum = 0;
+            for (k, 0, cols_a) { @ Looping through columns of Matrix A / rows of Matrix B
+                int index_a = i * cols_a + k;
+                int index_b = k * cols_b + j;
+                sum = sum + (matrix_a[index_a] * matrix_b[index_b]);
+            }
+            result.append(sum);
+        }
+    }
+    return result;
+}
+
+list<int> matrix_a = [1, 2, 3, 4, 5, 6]; @ 2x3 matrix
+list<int> matrix_b = [7, 8, 9, 10, 11, 12]; @ 3x2 matrix
+
+int rows_a = 2;
+int cols_a = 3;
+int rows_b = 3;
+int cols_b = 2;
+
+list<int> result = multiply_matrices(matrix_a, matrix_b, rows_a, cols_a, cols_b);
+
+print("Matrix A:");
+for (i, 0, rows_a) { @ Looping through rows of Matrix A
+    string row = "";
+    for (j, 0, cols_a) { @ Looping through columns of Matrix A
+        int index = i * cols_a + j;
+        row = row + STR(matrix_a[index]) + " "; @ Append each element to the row
+    }
+    print(row); @ Print the entire row on one line
+}
+
+print("Matrix B:");
+for (i, 0, rows_b) { @ Looping through rows of Matrix B
+    string row = "";
+    for (j, 0, cols_b) { @ Looping through columns of Matrix B
+        int index = i * cols_b + j;
+        row = row + STR(matrix_b[index]) + " "; @ Append each element to the row
+    }
+    print(row); @ Print the entire row on one line
+}
+
+print("Resultant Matrix:");
+int rows_result = rows_a;
+int cols_result = cols_b;
+for (i, 0, rows_result) { @ Looping through rows of the result matrix
+    string row = "";
+    for (j, 0, cols_result) { @ Looping through columns of the result matrix
+        int index = i * cols_result + j;
+        row = row + STR(result[index]) + " "; @ Append each element to the row
+    }
+    print(row); @ Print the entire row on one line
+}

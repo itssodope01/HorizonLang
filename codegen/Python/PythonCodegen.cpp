@@ -32,7 +32,6 @@ void PythonCodeGen::updateIndent() {
     currentIndent = std::string(indentLevel * 4, ' ');
 }
 
-
 std::string PythonCodeGen::generate(const std::shared_ptr<Program>& program) {
     // Python imports
     output << "# Generated Python code\n";
@@ -102,6 +101,11 @@ void PythonCodeGen::generateVarDecl(const std::shared_ptr<VarDecl>& varDecl) {
 
     // type information
     variableTypes[varDecl->name] = varDecl->type;
+
+    // If we're not inside a function, it's a global variable
+    if (!inFunction) {
+        globalVariables.insert(varDecl->name);
+    }
 }
 
 // function definition
@@ -123,17 +127,127 @@ void PythonCodeGen::generateFunction(const std::shared_ptr<Function>& func) {
 
     output << ":\n";
 
+    // Analyzing function body to collect assigned global variables
+    std::set<std::string> assignedGlobals;
+    inFunction = true;
+    for (const auto& stmt : func->body) {
+        collectAssignedVariables(stmt, assignedGlobals);
+    }
+    inFunction = false;
+
     // function body
     indent();
+
+    // global variables
+    if (!assignedGlobals.empty()) {
+        output << currentIndent << "global ";
+        bool first = true;
+        for (const auto& var : assignedGlobals) {
+            if (!first) output << ", ";
+            output << var;
+            first = false;
+        }
+        output << "\n";
+    }
+
     if (func->body.empty()) {
         output << currentIndent << "pass\n";
     } else {
+        inFunction = true;
         for (const auto& stmt : func->body) {
             generateStatement(stmt);
         }
+        inFunction = false;
     }
     dedent();
     output << "\n";
+}
+
+void PythonCodeGen::collectAssignedVariables(const StmtPtr& stmt, std::set<std::string>& assignedVars) {
+    if (auto assign = std::dynamic_pointer_cast<Assignment>(stmt)) {
+        if (auto id = std::dynamic_pointer_cast<Identifier>(assign->target)) {
+            if (globalVariables.count(id->name) > 0) {
+                assignedVars.insert(id->name);
+            }
+        }
+        // Recursively collect from value expression
+        collectAssignedVariables(assign->value, assignedVars);
+    }
+    else if (auto exprStmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt)) {
+        collectAssignedVariables(exprStmt->expression, assignedVars);
+    }
+    else if (auto ifStmt = std::dynamic_pointer_cast<If>(stmt)) {
+        collectAssignedVariables(ifStmt->condition, assignedVars);
+        for (const auto& s : ifStmt->thenBlock) {
+            collectAssignedVariables(s, assignedVars);
+        }
+        for (const auto& elifPair : ifStmt->elifBlocks) {
+            collectAssignedVariables(elifPair.first, assignedVars); // Condition
+            for (const auto& s : elifPair.second) {
+                collectAssignedVariables(s, assignedVars);
+            }
+        }
+        for (const auto& s : ifStmt->elseBlock) {
+            collectAssignedVariables(s, assignedVars);
+        }
+    }
+    else if (auto whileStmt = std::dynamic_pointer_cast<While>(stmt)) {
+        collectAssignedVariables(whileStmt->condition, assignedVars);
+        for (const auto& s : whileStmt->body) {
+            collectAssignedVariables(s, assignedVars);
+        }
+    }
+    else if (auto forStmt = std::dynamic_pointer_cast<For>(stmt)) {
+        collectAssignedVariables(forStmt->start, assignedVars);
+        collectAssignedVariables(forStmt->end, assignedVars);
+        if (forStmt->step) {
+            collectAssignedVariables(forStmt->step, assignedVars);
+        }
+        for (const auto& s : forStmt->body) {
+            collectAssignedVariables(s, assignedVars);
+        }
+    }
+    else if (auto tryCatch = std::dynamic_pointer_cast<TryCatch>(stmt)) {
+        for (const auto& s : tryCatch->tryBlock) {
+            collectAssignedVariables(s, assignedVars);
+        }
+        for (const auto& s : tryCatch->catchBlock) {
+            collectAssignedVariables(s, assignedVars);
+        }
+    }
+    // other statement
+}
+
+void PythonCodeGen::collectAssignedVariables(const ExprPtr& expr, std::set<std::string>& assignedVars) {
+    if (auto assign = std::dynamic_pointer_cast<Assignment>(expr)) {
+        if (auto id = std::dynamic_pointer_cast<Identifier>(assign->target)) {
+            if (globalVariables.count(id->name) > 0) {
+                assignedVars.insert(id->name);
+            }
+        }
+        collectAssignedVariables(assign->value, assignedVars);
+    }
+    else if (auto binaryOp = std::dynamic_pointer_cast<BinaryOp>(expr)) {
+        collectAssignedVariables(binaryOp->left, assignedVars);
+        collectAssignedVariables(binaryOp->right, assignedVars);
+    }
+    else if (auto unaryOp = std::dynamic_pointer_cast<UnaryOp>(expr)) {
+        collectAssignedVariables(unaryOp->operand, assignedVars);
+    }
+    else if (auto funcCall = std::dynamic_pointer_cast<FunctionCall>(expr)) {
+        collectAssignedVariables(funcCall->callee, assignedVars);
+        for (const auto& arg : funcCall->arguments) {
+            collectAssignedVariables(arg, assignedVars);
+        }
+    }
+    else if (auto listAccess = std::dynamic_pointer_cast<ListAccess>(expr)) {
+        collectAssignedVariables(listAccess->list, assignedVars);
+        collectAssignedVariables(listAccess->index, assignedVars);
+    }
+    else if (auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(expr)) {
+        collectAssignedVariables(memberAccess->object, assignedVars);
+    }
+    // other expression
 }
 
 // assignment statement
@@ -195,7 +309,7 @@ void PythonCodeGen::generateExpression(const ExprPtr& expr) {
         generateAssignment(assign);
     }
     else {
-        // Handle other expression types as needed
+        // other expression
     }
 }
 
@@ -457,7 +571,6 @@ void PythonCodeGen::generateForLoop(const std::shared_ptr<For>& forLoop) {
     dedent();
 }
 
-
 // Generate while loop
 void PythonCodeGen::generateWhileLoop(const std::shared_ptr<While>& whileLoop) {
     output << currentIndent << "while ";
@@ -469,7 +582,6 @@ void PythonCodeGen::generateWhileLoop(const std::shared_ptr<While>& whileLoop) {
     }
     dedent();
 }
-
 
 void PythonCodeGen::generateIfStatement(const std::shared_ptr<If>& ifStmt) {
     output << currentIndent << "if ";
@@ -483,7 +595,7 @@ void PythonCodeGen::generateIfStatement(const std::shared_ptr<If>& ifStmt) {
 
     // Handle elif blocks
     for (const auto& elifPair : ifStmt->elifBlocks) {
-        output << currentIndent << "elseif ";
+        output << currentIndent << "elif ";
         generateExpression(elifPair.first);  // elif condition
         output << ":\n";
         indent();
@@ -504,7 +616,6 @@ void PythonCodeGen::generateIfStatement(const std::shared_ptr<If>& ifStmt) {
     }
 }
 
-
 void PythonCodeGen::generateReturnStatement(const std::shared_ptr<Return>& returnStmt) {
     output << currentIndent << "return";
     if (returnStmt->value) {
@@ -514,13 +625,11 @@ void PythonCodeGen::generateReturnStatement(const std::shared_ptr<Return>& retur
     output << "\n";
 }
 
-
 void PythonCodeGen::generatePrint(const std::shared_ptr<Print>& printStmt) {
     output << currentIndent << "print(";
     generateExpression(printStmt->expression);
     output << ")\n";
 }
-
 
 void PythonCodeGen::generateExpressionStatement(const std::shared_ptr<ExpressionStatement>& exprStmt) {
 

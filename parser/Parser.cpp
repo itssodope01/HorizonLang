@@ -56,9 +56,12 @@ void Parser::synchronize() {
 StmtPtr Parser::declaration() {
     if (match(TokenType::FX)) return functionDeclaration();
 
+    size_t start = current;
 
-    if (check(TokenType::CONST) || (isType() && checkNext(TokenType::IDENTIFIER))) {
+    try {
         return varDeclaration();
+    } catch (const ParseError& e) {
+        current = start;
     }
 
     return statement();
@@ -551,20 +554,14 @@ TypePtr Parser::parseType() {
     if (match(TokenType::BOOL)) return std::make_shared<Type>(Type::Kind::BOOL);
     if (match(TokenType::LIST)) {
         consume(TokenType::LESS_THAN, "Expect '<' after 'list'.");
-
-        TypePtr elementType = nullptr;
-        // Check for the '>' immediately after '<' to allow for mixed-type lists
-        if (!check(TokenType::GREATER_THAN)) {
-            elementType = parseType();  // parse the element type if specified
-        }
-
+        TypePtr elementType = parseType();
         consume(TokenType::GREATER_THAN, "Expect '>' after list element type.");
-        auto type = std::make_shared<Type>(Type::Kind::LIST, elementType);
-        return type;
+        return std::make_shared<Type>(Type::Kind::LIST, elementType);
     }
 
     throw ParseError("Expect type.", peek());
 }
+
 
 // Utility methods
 Token Parser::peek() const {

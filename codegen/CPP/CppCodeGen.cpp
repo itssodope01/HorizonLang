@@ -1,9 +1,10 @@
 #include "CppCodeGen.h"
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 
 std::string CppCodeGen::generate(std::shared_ptr<Program> program) {
-    // necessary headers
+    // Include necessary headers
     codeStream << "#include <iostream>\n";
     codeStream << "#include <string>\n";
     codeStream << "#include <vector>\n";
@@ -11,7 +12,7 @@ std::string CppCodeGen::generate(std::shared_ptr<Program> program) {
     codeStream << "#include <algorithm>\n";
     codeStream << "\n";
 
-    // safe_divide function
+    // Safe divide function
     codeStream << "int safe_divide(int numerator, int denominator) {\n";
     codeStream << "    if (denominator == 0) {\n";
     codeStream << "        throw std::runtime_error(\"Division by zero\");\n";
@@ -19,58 +20,76 @@ std::string CppCodeGen::generate(std::shared_ptr<Program> program) {
     codeStream << "    return numerator / denominator;\n";
     codeStream << "}\n\n";
 
+    // Collect global variable declarations
+    std::vector<std::shared_ptr<VarDecl>> globalVars;
+    std::vector<StmtPtr> topLevelStatements;
+    std::unordered_map<std::string, std::string> functionRenames;
 
-    // global declarations
+    // First pass: Collect information
     for (const auto& stmt : program->statements) {
-        if (std::dynamic_pointer_cast<VarDecl>(stmt)) {
-            generateStatement(stmt);
+        if (auto varDecl = std::dynamic_pointer_cast<VarDecl>(stmt)) {
+            globalVars.push_back(varDecl);
+        } else if (auto funcDef = std::dynamic_pointer_cast<Function>(stmt)) {
+            // Rename main function if necessary
+            if (funcDef->name == "main") {
+                functionRenames["main"] = "hl_main";
+                funcDef->name = "hl_main";
+            }
+        } else {
+            topLevelStatements.push_back(stmt);
         }
     }
 
-    // function definitions
+    // Declare global variables
+    for (const auto& varDecl : globalVars) {
+        codeStream << "\n";
+        if (varDecl->isConst) {
+            codeStream << "const ";
+        }
+        generateType(varDecl->type);
+        codeStream << " " << varDecl->name;
+
+        // Initialize const variables at declaration
+        if (varDecl->isConst && varDecl->initializer) {
+            codeStream << " = ";
+            generateExpression(varDecl->initializer);
+        }
+
+        codeStream << ";\n";
+    }
+
+    // Function definitions
     for (const auto& stmt : program->statements) {
         if (auto funcDef = std::dynamic_pointer_cast<Function>(stmt)) {
             generateFunctionDefinition(funcDef);
         }
     }
 
-    // main function
+    // Main function
     codeStream << "\nint main() {\n";
     indentLevel++;
 
-    for (const auto& stmt : program->statements) {
-        if (std::dynamic_pointer_cast<Function>(stmt) || std::dynamic_pointer_cast<VarDecl>(stmt)) {
-
-            continue;
+    // Initialize non-const global variables within main
+    for (const auto& varDecl : globalVars) {
+        if (!varDecl->isConst && varDecl->initializer) {
+            indent();
+            codeStream << varDecl->name << " = ";
+            generateExpression(varDecl->initializer);
+            codeStream << ";\n";
         }
+    }
+
+    // Generate top-level statements
+    for (const auto& stmt : topLevelStatements) {
         generateStatement(stmt);
     }
 
-    codeStream << "    return 0;\n";
+    indent();
+    codeStream << "return 0;\n";
+    indentLevel--;
     codeStream << "}\n";
 
     return codeStream.str();
-}
-
-void CppCodeGen::generateSafeNegate(const ExprPtr& expr) {
-    codeStream << "(";
-    generateExpression(expr);
-    codeStream << " > 0 ? -";
-    generateExpression(expr);
-    codeStream << " : ";
-    generateExpression(expr);
-    codeStream << ")";
-}
-
-
-void CppCodeGen::writeToFile(const std::string& filename, const std::string& code) {
-    std::ofstream file(filename);
-    if (file.is_open()) {
-        file << code;
-        file.close();
-    } else {
-        throw std::runtime_error("Could not open file for writing: " + filename);
-    }
 }
 
 void CppCodeGen::generateFunctionDefinition(const std::shared_ptr<Function>& funcDef) {
@@ -135,7 +154,7 @@ void CppCodeGen::generateStatement(const StmtPtr& stmt) {
         }
         indentLevel--;
 
-        // Generate each "elseif" block
+        // Generate each "else if" block
         for (const auto& elifPair : ifStmt->elifBlocks) {
             indent();
             codeStream << "} else if (";
@@ -148,21 +167,18 @@ void CppCodeGen::generateStatement(const StmtPtr& stmt) {
             indentLevel--;
         }
 
-        indent();
-        codeStream << "}";
-
         // Generate the else block if it exists
         if (!ifStmt->elseBlock.empty()) {
-            codeStream << " else {\n";
+            indent();
+            codeStream << "} else {\n";
             indentLevel++;
             for (const auto& s : ifStmt->elseBlock) {
                 generateStatement(s);
             }
             indentLevel--;
-            indent();
-            codeStream << "}";
         }
-        codeStream << "\n";
+        indent();
+        codeStream << "}\n";
     } else if (auto whileStmt = std::dynamic_pointer_cast<While>(stmt)) {
         indent();
         codeStream << "while (";
@@ -204,7 +220,6 @@ void CppCodeGen::generateStatement(const StmtPtr& stmt) {
         } else {
             codeStream << "(__start < __end ? 1 : -1);\n";  // Default to 1 or -1 based on start and end
         }
-
 
         indent();
         codeStream << "for (int " << forStmt->iterator << " = __start; "
@@ -252,7 +267,7 @@ void CppCodeGen::generateStatement(const StmtPtr& stmt) {
         generateExpression(printStmt->expression);
         codeStream << " << std::endl;\n";
     } else {
-        // Handle other statement types if any
+        // other statement types
     }
 }
 
@@ -282,7 +297,12 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
             codeStream << "}";
         }
     } else if (auto ident = std::dynamic_pointer_cast<Identifier>(expr)) {
-        codeStream << ident->name;
+        // Adjust function names if necessary
+        std::string name = ident->name;
+        if (name == "main") {
+            name = "hl_main";
+        }
+        codeStream << name;
     } else if (auto binaryOp = std::dynamic_pointer_cast<BinaryOp>(expr)) {
         if (binaryOp->op == BinaryOp::Operator::DIV) {
             codeStream << "safe_divide(";
@@ -299,7 +319,7 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
         }
     } else if (auto funcCall = std::dynamic_pointer_cast<FunctionCall>(expr)) {
         if (auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(funcCall->callee)) {
-            // member functions
+            // Member functions
             if (memberAccess->memberName == "length") {
                 generateExpression(memberAccess->object);
                 codeStream << ".size()";
@@ -340,32 +360,33 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
                 // Other member functions
             }
         } else if (auto ident = std::dynamic_pointer_cast<Identifier>(funcCall->callee)) {
-            if (ident->name == "input") {
-                codeStream << "({ std::string tempInput; std::cout << ";
+            std::string name = ident->name;
+            if (name == "main") {
+                name = "hl_main";
+            }
+
+            if (name == "input") {
+                // Generate standard C++ code for input
+                codeStream << "([&]() -> std::string { std::string tempInput; std::cout << ";
                 generateExpression(funcCall->arguments[0]);
-                codeStream << "; std::getline(std::cin, tempInput); tempInput; })";
-            } else if (ident->name == "print") {
-                codeStream << "std::cout << ";
-                generateExpression(funcCall->arguments[0]);
-                codeStream << " << std::endl";
-            } else if (ident->name == "INT") {
+                codeStream << "; std::getline(std::cin, tempInput); return tempInput; })()";
+            } else if (name == "INT") {
                 codeStream << "std::stoi(";
                 generateExpression(funcCall->arguments[0]);
                 codeStream << ")";
                 return;
-            } else if (ident->name == "FLOAT") {
-                codeStream << "static_cast<float>(";
+            } else if (name == "FLOAT") {
+                codeStream << "std::stof(";
                 generateExpression(funcCall->arguments[0]);
                 codeStream << ")";
                 return;
-            } else if (ident->name == "STR") {
+            } else if (name == "STR") {
                 codeStream << "std::to_string(";
                 generateExpression(funcCall->arguments[0]);
                 codeStream << ")";
             } else {
                 // Regular function call
-                generateExpression(funcCall->callee);
-                codeStream << "(";
+                codeStream << name << "(";
                 for (size_t i = 0; i < funcCall->arguments.size(); ++i) {
                     generateExpression(funcCall->arguments[i]);
                     if (i < funcCall->arguments.size() - 1) {
@@ -402,7 +423,7 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
         codeStream << (unaryOp->op == UnaryOp::Operator::NOT ? "!" : "-");
         generateExpression(unaryOp->operand);
     } else {
-        // other expressions
+        // Other expressions
     }
 }
 
@@ -484,13 +505,12 @@ TypePtr CppCodeGen::inferFunctionReturnType(const std::shared_ptr<Function>& fun
     return std::make_shared<Type>(Type::Kind::VOID);
 }
 
-bool CppCodeGen::isNegativeLiteral(const ExprPtr& expr) {
-    if (auto literal = std::dynamic_pointer_cast<Literal>(expr)) {
-        if (std::holds_alternative<int>(literal->value)) {
-            return std::get<int>(literal->value) < 0;
-        } else if (std::holds_alternative<float>(literal->value)) {
-            return std::get<float>(literal->value) < 0.0;
-        }
+void CppCodeGen::writeToFile(const std::string& filename, const std::string& code) {
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        file << code;
+        file.close();
+    } else {
+        throw std::runtime_error("Could not open file for writing: " + filename);
     }
-    return false;
 }

@@ -1,0 +1,124 @@
+@ Polynomial Addition and Multiplication
+
+print("Welcome to the Polynomial Calculator!");
+
+@ Input the degree of the first polynomial
+string degree1_str = input("Enter the degree of the first polynomial: ");
+int degree1 = INT(degree1_str);
+
+@ Input coefficients of the first polynomial
+print("Enter the coefficients of the first polynomial from highest degree to constant term:");
+list<int> poly1 = [];
+int total_coeffs1 = degree1 + 1; @ Total coefficients needed
+
+for (i, 0, total_coeffs1) {
+    int exp = degree1 - i;
+    string coeff_str = input("Coefficient for x^" + STR(exp) + ": ");
+    int coeff = INT(coeff_str);
+    poly1.append(coeff);
+}
+
+@ Input the degree of the second polynomial
+string degree2_str = input("Enter the degree of the second polynomial: ");
+int degree2 = INT(degree2_str);
+
+@ Input coefficients of the second polynomial
+print("Enter the coefficients of the second polynomial from highest degree to constant term:");
+list<int> poly2 = [];
+int total_coeffs2 = degree2 + 1; @ Total coefficients needed
+
+for (i, 0, total_coeffs2) {
+    int exp = degree2 - i;
+    string coeff_str = input("Coefficient for x^" + STR(exp) + ": ");
+    int coeff = INT(coeff_str);
+    poly2.append(coeff);
+}
+
+@ Polynomial Addition
+int max_degree = degree1;
+if (degree2 > degree1) {
+    max_degree = degree2;
+}
+
+int total_coeffs_sum = max_degree + 1;
+list<int> sum_poly = [];
+
+@ Initialize sum_poly with zeros
+for (i, 0, total_coeffs_sum) {
+    sum_poly.append(0);
+}
+
+@ Align and add coefficients
+for (i, 0, total_coeffs_sum - 1) {
+    int exp = max_degree - i;
+    int coeff1 = 0;
+    int coeff2 = 0;
+
+    if (degree1 - exp >= 0 and degree1 - exp <= degree1) {
+        coeff1 = poly1[degree1 - exp];
+    }
+    if (degree2 - exp >= 0 and degree2 - exp <= degree2) {
+        coeff2 = poly2[degree2 - exp];
+    }
+    sum_poly[i] = coeff1 + coeff2;
+}
+
+@ Polynomial Multiplication
+int prod_degree = degree1 + degree2;
+int total_coeffs_prod = prod_degree + 1;
+list<int> prod_poly = [];
+
+@ Initialize prod_poly with zeros
+for (i, 0, total_coeffs_prod) {
+    prod_poly.append(0);
+}
+
+@ Multiply the polynomials
+for (i, 0, total_coeffs1) {
+    for (j, 0, total_coeffs2) {
+        int coeff = poly1[i] * poly2[j];
+        int index = i + j;
+        prod_poly[index] = prod_poly[index] + coeff;
+    }
+}
+
+@ Function to print polynomial
+fx print_poly(list<int> poly) {
+    int degree = poly.length() - 1;
+    string poly_str = "";
+    for (i, 0, degree) {
+        int coeff = poly[i];
+        int exp = degree - i;
+        if (coeff != 0) {
+            if (poly_str != "") {
+                if (coeff > 0) {
+                    poly_str = poly_str + " + ";
+                } else {
+                    poly_str = poly_str + " - ";
+                    coeff = -coeff;
+                }
+            } else {
+                if (coeff < 0) {
+                    poly_str = poly_str + "-";
+                    coeff = -coeff;
+                }
+            }
+            if (coeff != 1 or exp == 0) {
+                poly_str = poly_str + STR(coeff);
+            }
+            if (exp > 0) {
+                poly_str = poly_str + "x";
+                if (exp > 1) {
+                    poly_str = poly_str + "^" + STR(exp);
+                }
+            }
+        }
+    }
+    print(poly_str);
+}
+
+print("Sum of the polynomials:");
+print_poly(sum_poly);
+
+print("Product of the polynomials:");
+print_poly(prod_poly);
