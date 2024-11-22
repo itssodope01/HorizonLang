@@ -1,0 +1,10 @@
+int num = INT(input("Enter a decimal number: "));
+string binary = "";
+
+while (num > 0) {
+    int remainder = num % 2;
+    binary = STR(remainder) + binary;
+    num = num / 2;
+}
+
+print("The binary representation is: " + binary);

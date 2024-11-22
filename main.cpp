@@ -99,8 +99,19 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     } else {
-        std::cout << "No input file provided. Please enter your code (end with Ctrl+D):\n";
-        testInput = std::string(std::istreambuf_iterator<char>(std::cin), {});
+        std::cout << "No input file provided. Enter your code line by line (type END to finish):\n";
+
+        testInput.clear();
+        std::string line;
+
+        while (true) {
+            std::getline(std::cin, line);
+            if (line == "END") {
+                break;
+            }
+            testInput += line + '\n';
+        }
+        std::cout << "Input collection complete.\n";
     }
 
     try {

@@ -317,10 +317,31 @@ void PythonCodeGen::generateExpression(const ExprPtr& expr) {
 void PythonCodeGen::generateBinaryOp(const std::shared_ptr<BinaryOp>& binOp) {
     output << "(";
     generateExpression(binOp->left);
-    output << " " << binaryOperatorToString(binOp->op) << " ";
+
+    std::string opStr = binaryOperatorToString(binOp->op);
+
+    // Handle division operator
+    if (binOp->op == BinaryOp::Operator::DIV) {
+        // Check operand types
+        TypePtr leftType = binOp->left->type;
+        TypePtr rightType = binOp->right->type;
+
+        // If both operands are integers, we use // for integer division
+        if (leftType && rightType &&
+            leftType->kind == Type::Kind::INT &&
+            rightType->kind == Type::Kind::INT) {
+            opStr = "//";
+            } else {
+                // Otherwise, we use / for floating-point division
+                opStr = "/";
+            }
+    }
+
+    output << " " << opStr << " ";
     generateExpression(binOp->right);
     output << ")";
 }
+
 
 std::string PythonCodeGen::binaryOperatorToString(BinaryOp::Operator op) {
     switch (op) {

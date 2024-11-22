@@ -52,8 +52,10 @@ fx add(int a, int b) {
 ```ebnf
 VariableDeclaration ::= [ 'const' ] Type IDENTIFIER [ '=' Expression ] ';'
 
-Type             ::= 'int' | 'float' | 'string' | 'bool' | ListType
-ListType         ::= 'list' '<' [ Type ] '>'
+BaseType         ::= 'int' | 'float' | 'string' | 'bool'
+ListType         ::= 'list' '<' [ BaseType ] '>'
+Type             ::= BaseType | ListType
+
 ```
 
 Example:
@@ -126,7 +128,17 @@ while (condition) {
     endloop;
 }
 
-for (i, 0, 10, 1) {
+/@ 
+    Here i is iterator, 
+    0 is start value,
+    10 is end value,
+    2 is step value.
+    Step value is optional.
+    By default it is 1.
+    If start value > end value,
+    the loop runs backwards.
+ @/
+for (i, 0, 10, 2) {
     print(i);
 }
 ```
@@ -145,7 +157,7 @@ Example:
 try {
     riskyFunction();
 } catch (error) {
-    print("Error: " + STR(error));
+    print("Error Occured running riskyFunction");
 }
 ```
 
@@ -220,8 +232,8 @@ Example:
 
 ```horizonlang
 list<int> numbers = [1, 2, 3];
-numbers.append(4); // append, prepend
-numbers.empty() // clears the list
+numbers.append(4); @ append, prepend
+numbers.empty() @ clears the list
 print(numbers[2]);
 ```
 
@@ -249,10 +261,10 @@ ArgumentList          ::= Expression { ',' Expression }
 ```horizonlang
 string greeting = "Hello";
 string name = "World";
-string message = greeting + ", " + name;  // Concatenates strings
-int len = greeting.length();              // Gets the length of the string
-string partial = greeting.substring(1, 3); // Extracts substring from index 1 to 3
-string fullMessage = greeting.concat("!"); // Concatenates strings
+string message = greeting + ", " + name;  @ Concatenates strings
+int len = greeting.length();              @ Gets the length of the string
+string partial = greeting.substring(1, 3); @ Extracts substring from index 1 to 3
+string fullMessage = greeting.concat("!"); @ Concatenates strings
 print(fullMessage);
 ```
 
@@ -271,6 +283,34 @@ Example:
 ```horizonlang
 string name = input("Enter your name: ");
 print("Welcome, " + name + "!");
+```
+
+---
+
+---
+
+#### **Type Conversions**
+
+```ebnf
+Conversion       ::= 'INT' '(' Expression ')'
+                   | 'FLOAT' '(' Expression ')'
+                   | 'STR' '(' Expression ')'
+
+ConversionStatement ::= BaseType IDENTIFIER '=' Conversion ';'
+
+```
+
+Example:
+
+```horizonlang
+int num1 = 10;
+float num2 = 10.5;
+string num3 = "20";
+
+int num3_int = INT(num3);     @ Convert string "20" to integer 20
+string num1_str = STR(num1);  @ Convert integer 10 to string "10"
+float num1_float = FLOAT(num1); @ Convert integer 10 to float 10.0
+int num2_int = INT(num2);     @ Convert float 10.5 to integer 10
 ```
 
 ---
@@ -331,6 +371,57 @@ DELIMITERS      ::= '(' | ')' | '{' | '}' | '[' | ']' | ',' | ';' | '.'
 ```
 
 ---
+
+### **Important Notes**
+
+#### Language Features
+- **Statically Typed**: Ensures type safety and reduces runtime errors.
+- **Explicit Type Declarations**: Variables and function parameters require explicit types, promoting code clarity.
+- **Block Scoping**: Delimiters (`{}`) are used for scoping, making the language indentation-independent.
+
+#### Control Flow Highlights
+- **For Loops**:
+    - Backward iteration is supported when the start value is greater than the end value.
+    - Default step value is `1`; step values must always be positive.
+- **Break and Continue**:
+    - Use `endloop` to exit loops.
+    - Use `next` to skip iterations.
+
+#### Error Management
+- **Exception Handling**:
+    - Encouraged via `try` and `catch` blocks for robust programming.
+    - Provides clear and interpretable error messages for unhandled exceptions.
+
+#### Type Conversion
+- **Explicit Conversions**: Use `INT()`, `FLOAT()`, and `STR()` for type conversions.
+
+#### List Operations
+- **Strict Typing**: Lists cannot contain other lists (e.g., `list<list<int>>` is not allowed).
+- **Printing Limitations**: Direct printing of lists is not supported; elements must be accessed or formatted individually.
+
+#### String Manipulations
+- **Built-in Methods**: Includes `.concat()`, `.length()`, and `.substring()` for streamlined string operations.
+- **Concatenation**: String concatenation with `+` is straightforward and intuitive.
+
+#### Constraints
+- **No Recursion**: Iterative constructs must be used instead.
+- **Single Return Values**: Functions can only return a single value.
+- **No Multi-Dimensional Arrays**: Use 1D lists with index calculations to simulate 2D arrays.
+
+#### Commenting Rules
+- **Comments**:
+    - Single-line comments start with `@`.
+    - Multi-line comments are enclosed within `/@ ... @/`.
+
+#### Best Practices
+- **Exception Handling**: Use `try` and `catch` for critical sections to improve reliability.
+- **Simulated 2D Data Structures**: Use flat lists with index mapping.
+- **Modular Grammar**: Adhere to the modular grammar for extensibility and maintainability.
+
+#### Known Limitations
+- **Lack of Dynamic Typing**: May require additional conversions for flexible inputs.
+- **List Management**: The `.empty()` method clears lists but does not return a boolean, requiring careful management of list sizes.
+
 
 ### **Conclusion**
 
