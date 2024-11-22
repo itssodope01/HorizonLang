@@ -70,6 +70,7 @@ Build the project using `cmake`:
 
 ```bash
 mkdir build && cd build
+echo 'int main() {}' > output.cpp
 cmake ..
 make
 ```
@@ -81,10 +82,10 @@ make
 ### Steps to Compile and Run
 
 1. Create a `.hl` file with your Horizon Lang code, or use examples from the `examples` folder.
-2. Run the compiler with your file as an argument:
+2. Run the compiler with your file as an argument (make sure you are in the build directory):
 
    ```bash
-   ./HorizonLang examples/hello.hl
+   ./HorizonLang ../examples/hello.hl
    ```
 
 3. Choose your target compiler when prompted:
@@ -108,10 +109,10 @@ Here’s an example of compiling and running a Horizon Lang program:
    }
    ```
 
-2. Run the compiler:
+2. Run the compiler (make sure you are in the build directory):
 
    ```bash
-   ./HorizonLang examples/example.hl
+   ./HorizonLang ../examples/example.hl
    ```
 
 3. Choose `1` to generate and run Python code. The output will be:
