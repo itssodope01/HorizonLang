@@ -1,0 +1,11 @@
+@ Reverse a String
+
+fx reverse_string(string inpt) {
+    string reversed = "";
+    for (i, inpt.length() - 1, -1) {  @ end value is not included, so loop ends at 0.
+        reversed = reversed + (inpt.substring(i, (i+1)));
+    }
+    print("Revered Word: " + reversed);
+}
+
+reverse_string(input("Enter String: "));

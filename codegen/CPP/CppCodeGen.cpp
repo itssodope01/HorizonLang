@@ -324,12 +324,20 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
                 generateExpression(memberAccess->object);
                 codeStream << ".size()";
             } else if (memberAccess->memberName == "substring") {
+                // Generate object (string)
                 generateExpression(memberAccess->object);
                 codeStream << ".substr(";
+
+                // Generate start index
                 generateExpression(funcCall->arguments[0]);
                 codeStream << ", ";
-                generateExpression(funcCall->arguments[1]);
-                codeStream << ")";
+
+                // Generate length (end - start)
+                codeStream << "(";
+                generateExpression(funcCall->arguments[1]); // end index
+                codeStream << " - ";
+                generateExpression(funcCall->arguments[0]); // start index
+                codeStream << "))";
             } else if (memberAccess->memberName == "concat") {
                 generateExpression(memberAccess->object);
                 codeStream << " + ";
