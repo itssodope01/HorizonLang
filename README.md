@@ -1,6 +1,6 @@
 # Horizon Lang
 
-Horizon Lang is a custom programming language designed as a learning project to understand the fundamentals of compiler design, including lexing, parsing, semantic analysis, and code generation. The language supports high-level constructs, static typing, and a simplified syntax that allows for expressive programming. It can compile to both Python and C++.
+Horizon Lang is a custom programming language designed as a learning project to understand the fundamentals of compiler design, including lexing, parsing, semantic analysis, and code generation. The language supports high-level constructs, static typing, and a simplified syntax that allows for expressive programming. It is Turing complete, meaning it can theoretically solve any computational problem or build large-scale applications, demonstrating the power and versatility of its design. It can compile to both Python and C++.
 
 This repository provides all the necessary components to build, extend, and experiment with a custom programming language.
 
