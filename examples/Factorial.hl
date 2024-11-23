@@ -1,4 +1,13 @@
-fx factorial(int n) {
+@ Recursive factorial
+fx factorial_recursive(int n) {
+    if (n == 0 or n == 1) {
+        return 1; @ Base case
+    }
+    return n * factorial_recursive(n - 1); @ Recursive call
+}
+
+@ Stack-based factorial
+fx factorial_stack(int n) {
     int result = 1;
     list<int> stack = []; @ Simulate call stack
     stack.append(n);
@@ -15,6 +24,30 @@ fx factorial(int n) {
     return result;
 }
 
-int n = INT(input("Enter number to know its Factorial: "));
-int fact = factorial(n);
-print("Factorial of " + STR(n) + " is " + STR(fact));
+@ Iterative factorial
+fx factorial_iterative(int n) {
+    int result = 1;
+    for (i, 1, n+1) {
+        result = result * i;
+    }
+    return result;
+}
+
+@ Main program
+int choice = INT(input("Choose the factorial method:\n1. Recursive\n2. Stack-based\n3. Iterative\nEnter your choice (1, 2, or 3): "));
+
+int number = INT(input("Enter the number to calculate its factorial: "));
+int factorial_result;
+
+if (choice == 1) {
+    factorial_result = factorial_recursive(number);
+    print("Factorial of " + STR(number) + " using recursion is " + STR(factorial_result));
+} elseif (choice == 2) {
+    factorial_result = factorial_stack(number);
+    print("Factorial of " + STR(number) + " using stack-based method is " + STR(factorial_result));
+} elseif (choice == 3) {
+    factorial_result = factorial_iterative(number);
+    print("Factorial of " + STR(number) + " using iteration is " + STR(factorial_result));
+} else {
+    print("Invalid choice. Please run the program again.");
+}

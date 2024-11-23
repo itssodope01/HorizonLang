@@ -21,4 +21,3 @@ add_executable(HorizonLang main.cpp
         codegen/CPP/CppCodeGen.cpp
 )
 add_executable(output_executable output.cpp)
-

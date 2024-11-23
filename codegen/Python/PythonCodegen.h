@@ -46,6 +46,9 @@ private:
 
     // Type conversion helpers
     std::string convertType(const TypePtr& type);
+
+    std::string getObjectName(const ExprPtr &expr);
+
     std::string binaryOperatorToString(BinaryOp::Operator op);
     std::string unaryOperatorToString(UnaryOp::Operator op);
 

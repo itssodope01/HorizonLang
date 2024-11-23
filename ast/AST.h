@@ -30,7 +30,8 @@ public:
         STRING,
         BOOL,
         LIST,
-        VOID
+        VOID,
+        MATHOBJECT
     };
 
     Kind kind;

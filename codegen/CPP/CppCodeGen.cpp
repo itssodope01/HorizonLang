@@ -7,7 +7,9 @@ std::string CppCodeGen::generate(std::shared_ptr<Program> program) {
     // Include necessary headers
     codeStream << "#include <iostream>\n";
     codeStream << "#include <string>\n";
+    codeStream << "#include <cctype>\n";
     codeStream << "#include <vector>\n";
+    codeStream << "#include <cmath>\n";
     codeStream << "#include <stdexcept>\n";
     codeStream << "#include <algorithm>\n";
     codeStream << "\n";
@@ -282,7 +284,7 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
             if (strValue.size() >= 2 && strValue.front() == '"' && strValue.back() == '"') {
                 strValue = strValue.substr(1, strValue.size() - 2);
             }
-            codeStream << "\"" << escapeString(strValue) << "\"";
+            codeStream << "\"" << strValue << "\"";
         } else if (std::holds_alternative<bool>(literal->value)) {
             codeStream << (std::get<bool>(literal->value) ? "true" : "false");
         } else if (std::holds_alternative<std::vector<ExprPtr>>(literal->value)) {
@@ -342,6 +344,36 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
                 generateExpression(memberAccess->object);
                 codeStream << " + ";
                 generateExpression(funcCall->arguments[0]);
+            } else if (memberAccess->memberName == "toUpper" || memberAccess->memberName == "toLower") {
+                if (memberAccess->memberName == "toUpper") {
+                    // Convert string to uppercase using std::transform and std::toupper
+                    codeStream << "([&]() { std::string temp = ";
+                    generateExpression(memberAccess->object);
+                    codeStream << "; std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::toupper(c); }); return temp; })()";
+                } else if (memberAccess->memberName == "toLower") {
+                    // Convert string to lowercase using std::transform and std::tolower
+                    codeStream << "([&]() { std::string temp = ";
+                    generateExpression(memberAccess->object);
+                    codeStream << "; std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::tolower(c); }); return temp; })()";
+                }
+            } else if (memberAccess->memberName == "sub") {
+                codeStream << "([&]() {\n";
+                codeStream << "    std::string temp = ";
+                generateExpression(memberAccess->object); // The original string
+                codeStream << ";\n";
+                codeStream << "    std::string oldVal = ";
+                generateExpression(funcCall->arguments[0]); // The old substring
+                codeStream << ";\n";
+                codeStream << "    std::string newVal = ";
+                generateExpression(funcCall->arguments[1]); // The new substring
+                codeStream << ";\n";
+                codeStream << "    size_t pos = 0;\n";
+                codeStream << "    while ((pos = temp.find(oldVal, pos)) != std::string::npos) {\n";
+                codeStream << "        temp.replace(pos, oldVal.length(), newVal);\n";
+                codeStream << "        pos += newVal.length(); // Advance past the new substring\n";
+                codeStream << "    }\n";
+                codeStream << "    return temp;\n";
+                codeStream << "})()";
             } else if (memberAccess->memberName == "append") {
                 generateExpression(memberAccess->object);
                 codeStream << ".push_back(";
@@ -364,6 +396,37 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
             } else if (memberAccess->memberName == "empty") {
                 generateExpression(memberAccess->object);
                 codeStream << ".clear()";
+            } else if (memberAccess->memberName == "power") {
+                // Generate code for power function
+                if (funcCall->arguments.size() == 1) {
+                    codeStream << "std::pow(";
+                    generateExpression(memberAccess->object); // base
+                    codeStream << ", ";
+                    generateExpression(funcCall->arguments[0]); // exponent
+                    codeStream << ")";
+                } else {
+                    codeStream << "std::pow(";
+                    generateExpression(funcCall->arguments[0]); // base
+                    codeStream << ", ";
+                    generateExpression(funcCall->arguments[1]); // exponent
+                    codeStream << ")";
+                }
+
+            } else if (memberAccess->memberName == "sqrt") {
+                // std::sqrt(x)
+                codeStream << "std::sqrt(";
+                generateExpression(funcCall->arguments[0]);
+                codeStream << ")";
+            } else if (memberAccess->memberName == "round") {
+                // std::round(x)
+                codeStream << "std::round(";
+                generateExpression(funcCall->arguments[0]);
+                codeStream << ")";
+            } else if (memberAccess->memberName == "abs") {
+                // std::abs(x)
+                codeStream << "std::abs(";
+                generateExpression(funcCall->arguments[0]);
+                codeStream << ")";
             } else {
                 // Other member functions
             }
@@ -379,16 +442,44 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
                 generateExpression(funcCall->arguments[0]);
                 codeStream << "; std::getline(std::cin, tempInput); return tempInput; })()";
             } else if (name == "INT") {
-                codeStream << "std::stoi(";
-                generateExpression(funcCall->arguments[0]);
-                codeStream << ")";
-                return;
+                TypePtr argType = funcCall->arguments[0]->type;
+                if (argType->kind == Type::Kind::STRING) {
+                    codeStream << "std::stoi(";
+                    generateExpression(funcCall->arguments[0]);
+                    codeStream << ")";
+                }
+                else if (argType->kind == Type::Kind::FLOAT) {
+                    codeStream << "static_cast<int>(";
+                    generateExpression(funcCall->arguments[0]);
+                    codeStream << ")";
+                }
+                else if (argType->kind == Type::Kind::BOOL) {
+                    codeStream << "(";
+                    generateExpression(funcCall->arguments[0]);
+                    codeStream << " ? 1 : 0)";
+                }
             } else if (name == "FLOAT") {
-                codeStream << "std::stof(";
-                generateExpression(funcCall->arguments[0]);
-                codeStream << ")";
-                return;
-            } else if (name == "STR") {
+                TypePtr argType = funcCall->arguments[0]->type;
+                if (argType->kind == Type::Kind::STRING) {
+                    // Convert from string to float using std::stof
+                    codeStream << "std::stof(";
+                    generateExpression(funcCall->arguments[0]);
+                    codeStream << ")";
+                }
+                else if (argType->kind == Type::Kind::INT) {
+                    // Convert from int to float using static_cast
+                    codeStream << "static_cast<float>(";
+                    generateExpression(funcCall->arguments[0]);
+                    codeStream << ")";
+                }
+                else if (argType->kind == Type::Kind::BOOL) {
+                    // Convert from bool to float (true -> 1.0, false -> 0.0)
+                    codeStream << "(";
+                    generateExpression(funcCall->arguments[0]);
+                    codeStream << " ? 1.0f : 0.0f)";
+                }
+            }
+            else if (name == "STR") {
                 codeStream << "std::to_string(";
                 generateExpression(funcCall->arguments[0]);
                 codeStream << ")";
@@ -480,20 +571,6 @@ std::string CppCodeGen::getOperatorString(BinaryOp::Operator op) {
         case BinaryOp::Operator::OR:  return "||";
         default: return "";
     }
-}
-
-std::string CppCodeGen::escapeString(const std::string& str) {
-    std::string escaped;
-    for (char c : str) {
-        switch (c) {
-            case '\\': escaped += "\\\\"; break;
-            case '\"': escaped += "\\\""; break;
-            case '\n': escaped += "\\n";  break;
-            case '\t': escaped += "\\t";  break;
-            default:   escaped += c;      break;
-        }
-    }
-    return escaped;
 }
 
 void CppCodeGen::indent() {

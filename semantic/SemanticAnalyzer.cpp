@@ -5,6 +5,10 @@ bool SemanticAnalyzer::analyze(const std::shared_ptr<Program>& program) {
     enterScope(); // Start the global scope
     loopDepth = 0;
 
+    currentScope()["Math"] = std::make_shared<Type>(Type::Kind::MATHOBJECT);
+    currentInitializedScope()["Math"] = true;
+
+
     // First pass: Register all function declarations
     for (const auto& stmt : program->statements) {
         if (auto func = std::dynamic_pointer_cast<Function>(stmt)) {
@@ -26,6 +30,10 @@ const std::vector<std::string>& SemanticAnalyzer::getErrors() const {
 }
 
 void SemanticAnalyzer::registerFunction(const std::shared_ptr<Function>& function) {
+    if (function->name == "Math") {
+        addError("Cannot declare function named 'Math' as it is reserved.");
+        return;
+    }
     // Check for redeclaration
     if (symbolTableStack.back().find(function->name) != symbolTableStack.back().end()) {
         addError("Function redeclaration: " + function->name);
@@ -69,6 +77,9 @@ bool SemanticAnalyzer::isVariableDeclared(const std::string& name) const {
 
 void SemanticAnalyzer::checkStatement(const std::shared_ptr<Statement>& stmt) {
     if (auto tryCatch = std::dynamic_pointer_cast<TryCatch>(stmt)) {
+        if (tryCatch->exceptionName == "Math") {
+            addError("Exception variable cannot be named 'Math' as it is reserved.");
+        }
         // Check try block
         enterScope();
         for (const auto& tryStmt : tryCatch->tryBlock) {
@@ -244,6 +255,10 @@ TypePtr SemanticAnalyzer::checkExpression(const std::shared_ptr<Expression>& exp
 }
 
 void SemanticAnalyzer::checkVarDeclaration(const std::shared_ptr<VarDecl>& varDecl) {
+    if (varDecl->name == "Math") {
+        addError("Cannot declare variable named 'Math' as it is reserved.");
+        return;
+    }
     if (isVariableDeclared(varDecl->name)) {
         addError("Variable redeclaration: " + varDecl->name);
         return;
@@ -311,6 +326,11 @@ void SemanticAnalyzer::checkFunction(const std::shared_ptr<Function>& function) 
     currentFunctionName = function->name;
     currentFunctionReturnType = std::nullopt; // Return type will be inferred
     hasReturnStatement = false;
+
+    if (function->name == "Math") {
+        addError("Cannot declare function named 'Math' as it is reserved.");
+        return;
+    }
 
     // Check parameter types and names
     std::unordered_set<std::string> paramNames;
@@ -426,7 +446,8 @@ TypePtr SemanticAnalyzer::checkFunctionCall(const std::shared_ptr<FunctionCall>&
                 }
             } else if (argType->kind != Type::Kind::FLOAT &&
                        argType->kind != Type::Kind::BOOL &&
-                       argType->kind != Type::Kind::STRING) {
+                       argType->kind != Type::Kind::STRING
+                       ) {
                 addError("`INT` function argument must be float, bool, or string.");
             }
             return std::make_shared<Type>(Type::Kind::INT);
@@ -549,8 +570,7 @@ TypePtr SemanticAnalyzer::checkFunctionCall(const std::shared_ptr<FunctionCall>&
                     addError("Method `length` expects no arguments.");
                 }
                 return std::make_shared<Type>(Type::Kind::INT);
-            }
-            else if (methodName == "substring") {
+            } else if (methodName == "substring") {
                 // `substring` requires exactly two integer arguments
                 if (funcCall->arguments.size() != 2) {
                     addError("Method `substring` expects two integer arguments.");
@@ -562,8 +582,7 @@ TypePtr SemanticAnalyzer::checkFunctionCall(const std::shared_ptr<FunctionCall>&
                     }
                 }
                 return std::make_shared<Type>(Type::Kind::STRING);
-            }
-            else if (methodName == "concat") {
+            } else if (methodName == "concat") {
                 // `concat` requires exactly one string argument
                 if (funcCall->arguments.size() != 1) {
                     addError("Method `concat` expects one string argument.");
@@ -574,10 +593,115 @@ TypePtr SemanticAnalyzer::checkFunctionCall(const std::shared_ptr<FunctionCall>&
                     }
                 }
                 return std::make_shared<Type>(Type::Kind::STRING);
-            }
-            else {
+            } else if (methodName == "toUpper" || methodName == "toLower") {
+                // should not accept any arguments
+                if (!funcCall->arguments.empty()) {
+                    addError("Method `"+ methodName + "` expects no arguments.");
+                }
+                return std::make_shared<Type>(Type::Kind::STRING);
+            } else if (methodName == "sub") {
+                // should not accept any arguments
+                if (funcCall->arguments.size() != 2) {
+                    addError("Method `"+ methodName + "` expects two string arguments.");
+                } else {
+                    TypePtr argType1 = checkExpression(funcCall->arguments[0]);
+                    TypePtr argType2 = checkExpression(funcCall->arguments[1]);
+                    if (argType1->kind != Type::Kind::STRING || argType2->kind != Type::Kind::STRING) {
+                        addError("Arguments to `sub` must be strings.");
+                    }
+                }
+                return std::make_shared<Type>(Type::Kind::STRING);
+            } else {
                 addError("Invalid method `" + methodName + "` for string type.");
                 return std::make_shared<Type>(Type::Kind::VOID);
+            }
+        }
+        if (objectType->kind == Type::Kind::INT) {
+            std::string methodName = memberAccess->memberName;
+
+            if (methodName == "power") {
+            // `concat` requires exactly one string argument
+                if (funcCall->arguments.size() != 1) {
+                    addError("Method `power` expects one integer argument.");
+                } else {
+                    TypePtr argType = checkExpression(funcCall->arguments[0]);
+                    if (argType->kind != Type::Kind::INT) {
+                        addError("Argument to `power` must be integer.");
+                    }
+                }
+                return std::make_shared<Type>(Type::Kind::INT);
+            }
+        }
+        if (objectType->kind == Type::Kind::MATHOBJECT) {
+            std::string methodName = memberAccess->memberName;
+            if (methodName == "power") {
+                // 'power' requires exactly two numeric arguments
+                if (funcCall->arguments.size() != 2) {
+                    addError("Method 'power' expects two numeric arguments.");
+                } else {
+                    TypePtr arg1Type = checkExpression(funcCall->arguments[0]);
+                    TypePtr arg2Type = checkExpression(funcCall->arguments[1]);
+                    if (!isNumericType(arg1Type) || !isNumericType(arg2Type)) {
+                        addError("Arguments to 'power' must be numeric.");
+                    }
+                }
+                // Determine return type based on argument types
+                if (funcCall->arguments.size() == 2) {
+                    TypePtr arg1Type = funcCall->arguments[0]->type;
+                    TypePtr arg2Type = funcCall->arguments[1]->type;
+                    if (arg1Type->kind == Type::Kind::INT && arg2Type->kind == Type::Kind::INT) {
+                        return std::make_shared<Type>(Type::Kind::INT);
+                    } else {
+                        return std::make_shared<Type>(Type::Kind::FLOAT);
+                    }
+                } else {
+                    return std::make_shared<Type>(Type::Kind::VOID);
+                }
+            }
+            else if (methodName == "sqrt") {
+                // 'sqrt' requires exactly one numeric argument
+                if (funcCall->arguments.size() != 1) {
+                    addError("Method 'sqrt' expects one numeric argument.");
+                } else {
+                    TypePtr argType = checkExpression(funcCall->arguments[0]);
+                    if (!isNumericType(argType)) {
+                        addError("Argument to 'sqrt' must be numeric.");
+                    }
+                }
+                return std::make_shared<Type>(Type::Kind::FLOAT);
+            }
+            else if (methodName == "abs") {
+                // 'abs' requires exactly one numeric argument
+                if (funcCall->arguments.size() != 1) {
+                    addError("Method 'abs' expects one numeric argument.");
+                } else {
+                    TypePtr argType = checkExpression(funcCall->arguments[0]);
+                    if (!isNumericType(argType)) {
+                        addError("Argument to 'abs' must be numeric.");
+                    }
+                }
+                // Return type depends on argument type
+                if (funcCall->arguments.size() == 1) {
+                    TypePtr argType = funcCall->arguments[0]->type;
+                    return std::make_shared<Type>(argType->kind);
+                } else {
+                    return std::make_shared<Type>(Type::Kind::VOID);
+                }
+            }
+            else if (methodName == "round") {
+                // 'round' requires exactly one numeric argument
+                if (funcCall->arguments.size() != 1) {
+                    addError("Method 'round' expects one numeric argument.");
+                } else {
+                    TypePtr argType = checkExpression(funcCall->arguments[0]);
+                    if (!isNumericType(argType)) {
+                        addError("Argument to 'round' must be numeric.");
+                    }
+                }
+                 return std::make_shared<Type>(Type::Kind::INT);
+            }
+            else {
+                addError("Invalid method '" + methodName + "' for Math object.");
             }
         }
 
@@ -605,6 +729,10 @@ void SemanticAnalyzer::checkListOperation(const std::shared_ptr<ListAccess>& lis
 
 void SemanticAnalyzer::checkForLoop(const std::shared_ptr<For>& forLoop) {
     enterScope();
+
+    if (forLoop->iterator == "Math") {
+        addError("Loop iterator cannot be named 'Math' as it is reserved.");
+    }
 
     // Mark the iterator as an initialized integer
     currentScope()[forLoop->iterator] = std::make_shared<Type>(Type::Kind::INT);

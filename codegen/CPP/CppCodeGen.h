@@ -24,7 +24,7 @@ private:
 
     // Utility methods
     std::string getOperatorString(BinaryOp::Operator op);
-    std::string escapeString(const std::string& str);
+
     void indent();
     bool isNegativeLiteral(const ExprPtr& expr);
     TypePtr inferFunctionReturnType(const std::shared_ptr<Function>& funcDef);

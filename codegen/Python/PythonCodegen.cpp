@@ -1,6 +1,7 @@
 #include "PythonCodegen.h"
 #include <fstream>
 #include <stdexcept>
+#include <sstream>
 
 // built-in functions mapping
 const std::unordered_map<std::string, std::string> PythonCodeGen::builtinFunctions = {
@@ -13,6 +14,9 @@ const std::unordered_map<std::string, std::string> PythonCodeGen::builtinFunctio
     {"input", "input"},
     {"INT", "int"},
     {"FLOAT", "float"},
+    {"toUpper", "upper"},
+    {"toLower", "lower"},
+    {"sub", "replace"},
 };
 
 // Helper methods for indentation
@@ -36,6 +40,7 @@ std::string PythonCodeGen::generate(const std::shared_ptr<Program>& program) {
     // Python imports
     output << "# Generated Python code\n";
     output << "from typing import List, Any\n\n";
+    output << "import math\n\n";
 
     // Generating program statements
     for (const auto& stmt : program->statements) {
@@ -288,7 +293,12 @@ void PythonCodeGen::generateExpression(const ExprPtr& expr) {
         }
     }
     else if (auto identifier = std::dynamic_pointer_cast<Identifier>(expr)) {
-        output << identifier->name;
+            if (identifier->name == "Math") {
+                output << "math";
+            }
+            else {
+                output << identifier->name;
+            }
     }
     else if (auto binaryOp = std::dynamic_pointer_cast<BinaryOp>(expr)) {
         generateBinaryOp(binaryOp);
@@ -402,6 +412,40 @@ void PythonCodeGen::generateFunctionCall(const std::shared_ptr<FunctionCall>& ca
             generateExpression(memberAccess->object);
             output << " + ";
             generateExpression(call->arguments[0]);
+        } else if (methodName == "power" && call->arguments.size() == 1) {
+            // obj.power(n) -> obj ** n
+                output << "(";
+                generateExpression(memberAccess->object);  // Base value
+                output << " ** ";
+                generateExpression(call->arguments[0]);  // Exponent
+                output << ")";
+        } else if (methodName == "sqrt" || methodName == "power") {
+            // math.sqrt(x) or math.pow(x, y)
+            output << "math." ;
+            if (methodName == "sqrt") {
+                output << "sqrt(";
+            } else {
+                output << "pow(";
+            }
+            for (size_t i = 0; i < call->arguments.size(); ++i) {
+                generateExpression(call->arguments[i]);
+                if (i < call->arguments.size() - 1) {
+                    output << ", ";
+                }
+            }
+            output << ")";
+        }
+        else if (methodName == "round") {
+            // round(x)
+            output << "round(";
+            generateExpression(call->arguments[0]);
+            output << ")";
+        }
+        else if (methodName == "abs") {
+            // abs(x)
+            output << "abs(";
+            generateExpression(call->arguments[0]);
+            output << ")";
         }
         else {
 
