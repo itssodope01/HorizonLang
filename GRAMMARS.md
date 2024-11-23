@@ -263,7 +263,7 @@ string greeting = "Hello";
 string name = "World";
 string message = greeting + ", " + name;  @ Concatenates strings
 int len = greeting.length();              @ Gets the length of the string
-string partial = greeting.substring(1, 3); @ Extracts substring from index 1 to 3
+string partial = greeting.substring(1, 3); @ Extracts substring from index 1 to 2 (end index is excluded)
 string fullMessage = greeting.concat("!"); @ Concatenates strings
 print(fullMessage);
 ```
