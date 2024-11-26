@@ -478,9 +478,9 @@ BaseTypeMethodCall  ::= ( IdentifierReference | BaseLiteral ) '.' BaseTypeMethod
 BaseTypeMethodName  ::= IntMethodName | FloatMethodName | StringMethodName | BoolMethodName
 
 IntMethodName       ::= power       (* E.g., intVar.power(exponent) *)
-FloatMethodName     ::=             (* Define if any float methods are available *)
+FloatMethodName     ::=             
 StringMethodName    ::=             (* Already defined in String Methods *)
-BoolMethodName      ::=             (* Define if any bool methods are available *)
+BoolMethodName      ::=             
 ```
 
 - Methods are called using dot notation on literals or variables.
