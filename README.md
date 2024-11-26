@@ -197,6 +197,11 @@ Once WSL is set up, you'll need to install the necessary development tools insid
    - **Using a Code Editor**:
 
      Navigate to the `build` directory of the project in your code editor (e.g., VS Code, Sublime Text) to browse and inspect the generated `output.py` or `output.cpp` files visually.
+     ```bash
+     cd .. # Navigate to project root from build directory
+     code . # opens the project in VS Code
+     ```
+
 
 6. **Optional: View the Abstract Syntax Tree (AST) Structure**
 
@@ -204,7 +209,7 @@ Once WSL is set up, you'll need to install the necessary development tools insid
 
    - **Uncomment AST Printing Lines**:
 
-     Open `main.cpp` and uncomment lines 145 and 146:
+     Open `main.cpp` and uncomment lines 145 and 146 and save it:
 
      ```cpp
      // Uncomment lines below to see AST Structure
