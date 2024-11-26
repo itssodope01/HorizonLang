@@ -189,16 +189,21 @@ try {
 ReturnStatement     ::= 'return' [ Expression ] ';'
 ```
 
-- Exits a function and optionally returns a value.
-- In `void` functions, the expression is omitted.
+- Exits a function and returns a value.
+- The expression is optional.
 
 **Example:**
 
 ```horizonlang
-fx greet(string name) {
-    print("Hello, " + name + "!");
-    return;
+fx sumOfDigits(int a) {
+    int sum = 0;
+    while (a > 0) {
+        sum = sum + (a % 10);
+        a = a / 10;
+    }
+    return sum;
 }
+
 ```
 
 ---
