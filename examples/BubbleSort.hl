@@ -1,10 +1,11 @@
-/@ Program to sort a list of integers using Bubble Sort @/
+/@ Bubble Sort Algorithm with User Input @/
 
 fx bubble_sort(list<int> numbers) {
     int n = numbers.length();
     for (i, 0, n - 1) { @ Outer loop
-        for (j, 0, n - 2) { @ Inner loop
+        for (j, 0, n - 1 - i) { @ Inner loop to compare adjacent elements
             if (numbers[j] > numbers[j + 1]) {
+                @ Swap numbers[j] and numbers[j + 1]
                 int temp = numbers[j];
                 numbers[j] = numbers[j + 1];
                 numbers[j + 1] = temp;
@@ -14,16 +15,30 @@ fx bubble_sort(list<int> numbers) {
     return numbers;
 }
 
-list<int> numbers = [64, 25, 34, 12, 22, 42, 11, 90];
+@ Main Program @
+fx main() {
+    @ Input the size of the list
+    int size = INT(input("Enter the number of elements in the list: "));
+    list<int> numbers = [];
 
-print("Original List:");
-for (i, 0, numbers.length() - 1) {
-    print(numbers[i]);
+    @ Populate the list with user inputs
+    for (i, 1, size + 1) {
+        int element = INT(input("Enter element " + STR(i) + ": "));
+        numbers.append(element);
+    }
+
+    print("Original List:");
+    for (i, 0, numbers.length()) {
+        print(numbers[i]);
+    }
+
+    @ Sort the list using bubble sort
+    list<int> sorted_numbers = bubble_sort(numbers);
+
+    print("Sorted List:");
+    for (i, 0, sorted_numbers.length()) {
+        print(sorted_numbers[i]);
+    }
 }
 
-list<int> sorted_numbers = bubble_sort(numbers);
-
-print("Sorted List:");
-for (i, 0, sorted_numbers.length() - 1) {
-    print(sorted_numbers[i]);
-}
+main();

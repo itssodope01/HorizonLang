@@ -140,6 +140,8 @@ int main(int argc, char* argv[]) {
         }
 
         std::cout << "\nParsing and Semantic analysis successful!\n" << std::endl;
+
+        // Uncomment lines below to see AST Structure
         // std::cout << "\nAST structure:" << std::endl;
         // ASTPrinter::printAST(program);
 

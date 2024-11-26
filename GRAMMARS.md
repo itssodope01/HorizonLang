@@ -19,7 +19,7 @@ The grammar specification is presented using Extended Backus-Naur Form (EBNF) an
 #### **Program Structure**
 
 ```ebnf
-Program             ::= { Declaration }
+Program             ::= { FunctionDeclaration | VariableDeclaration | Statement }                     
 ```
 
 - A HorizonLang program consists of zero or more declarations.
@@ -34,6 +34,7 @@ FunctionDeclaration ::= 'fx' IDENTIFIER '(' [ ParameterList ] ')' '{' Block '}'
 
 ParameterList       ::= Parameter { ',' Parameter }
 Parameter           ::= Type IDENTIFIER
+Block               ::= { VariableDeclaration | Statement }
 ```
 
 - Functions are declared using the `fx` keyword, followed by the function name and parameter list.
@@ -91,7 +92,7 @@ LoopStatement       ::= WhileStatement | ForStatement
 
 BlockStatement      ::= '{' Block '}'
 
-Block               ::= { Declaration | Statement }
+Block               ::= { VariableDeclaration | Statement }
 ```
 
 - Statements control the flow of execution.
@@ -281,6 +282,7 @@ Primary             ::= BaseLiteral
                       | ListLiteral
                       | '(' Expression ')'
                       | FunctionCall
+                      | StringMethodCall
                       | IdentifierReference
                       | ListAccess
                       | MemberAccess

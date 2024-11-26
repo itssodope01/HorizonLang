@@ -1,3 +1,4 @@
+
 # Horizon Lang
 
 Horizon Lang is a custom programming language designed as a learning project to understand the fundamentals of compiler design, including lexing, parsing, semantic analysis, and code generation. The language supports high-level constructs, static typing, and a simplified syntax that allows for expressive programming. It is Turing complete, meaning it can theoretically solve any computational problem or build large-scale applications, demonstrating the power and versatility of its design. It can compile to both Python and C++.
@@ -35,7 +36,7 @@ Examples of Horizon Lang programs are available in the [examples](./examples) fo
 - List manipulations
 - Error handling with `try`-`catch`
 
-Example `hello.hl`:
+**Example `hello.hl`:**
 
 ```horizon
 fx hello ( string name ) {
@@ -52,28 +53,98 @@ hello(name);
 
 ### Prerequisites
 
+#### Common Requirements
+
 - **C++ compiler**: Ensure a modern C++ compiler (e.g., GCC, Clang) is installed.
 - **Python 3**: Required for Python code compilation and execution.
 - **CMake**: For building the C++ backend.
 - **Git**: To clone the repository.
 
-### Building the Compiler
+#### If you are using Windows
 
-Clone the repository and navigate to its directory:
+- **Windows Subsystem for Linux (WSL)**: Recommended for running Unix-like commands and environments on Windows.
+   - **Installation Guide**: [Install WSL](https://docs.microsoft.com/en-us/windows/wsl/install)
 
-```bash
-git clone https://github.com/itssodope01/HorizonLang.git
-cd HorizonLang
-```
+> **⚠️ Important:**  
+> Commands such as `cmake ..` and `make` **do not work** in native Windows Command Prompt or PowerShell. To execute these commands on Windows, you must use a Unix-like terminal provided by **WSL**.
 
-Build the project using `cmake`:
+---
 
-```bash
-mkdir build && cd build
-echo 'int main() {}' > output.cpp
-cmake ..
-make
-```
+### Additional Instructions for Windows Users
+
+To ensure a smooth setup and build process on Windows, follow the detailed steps below:
+
+#### 1. Install Windows Subsystem for Linux (WSL)
+
+WSL allows you to run a Linux environment directly on Windows, which is essential for executing Unix-like commands such as `cmake` and `make`. Follow these steps to install WSL:
+
+1. **Open PowerShell as Administrator**:
+   - Press `Win + X` and select **Windows PowerShell (Admin)**.
+
+2. **Enable WSL**:
+    ```powershell
+    wsl --install
+    ```
+   - This command installs the latest WSL version along with the default Linux distribution (usually Ubuntu).
+
+3. **Restart Your Computer**:
+   - After installation, you may be prompted to restart your machine.
+
+4. **Set Up Your Linux Distribution**:
+   - Upon restarting, launch the installed Linux distribution from the Start menu.
+   - Follow the on-screen instructions to create a Unix username and password.
+
+> **Alternative Installation Guide**: If you encounter issues, refer to the [official WSL installation guide](https://docs.microsoft.com/en-us/windows/wsl/install).
+
+#### 2. Install Required Tools Within WSL (or in your Linux System if they are not already installed.)
+
+Once WSL is set up, you'll need to install the necessary development tools inside the Linux environment:
+
+1. **Update Package Lists**:
+    ```bash
+    sudo apt update
+    ```
+
+2. **Install Git, CMake, and a C++ Compiler**:
+    ```bash
+    sudo apt install git cmake build-essential
+    ```
+
+3. **Install Python 3**:
+    ```bash
+    sudo apt install python3
+    ```
+
+   - **Verify Installations**:
+       ```bash
+       git --version
+       cmake --version
+       g++ --version
+       python3 --version
+       ```
+
+---
+
+### Building the HorizonLang Compiler
+
+> **Note for Windows Users:**  
+> If you are on Windows, ensure you are executing the following commands within the **WSL** terminal.
+
+1. **Clone the repository and navigate to its directory:**
+
+    ```bash
+    git clone https://github.com/itssodope01/HorizonLang.git
+    cd HorizonLang
+    ```
+
+2. **Build the project using `cmake`:**
+
+    ```bash
+    mkdir build && cd build
+    echo 'int main() {}' > output.cpp
+    cmake ..
+    make
+    ```
 
 ---
 
@@ -81,18 +152,76 @@ make
 
 ### Steps to Compile and Run
 
-1. Create a `.hl` file with your Horizon Lang code, or use examples from the `examples` folder.
-2. Run the compiler with your file as an argument (make sure you are in the build directory):
+> **Note:**  
+> Ensure you are in the **WSL** terminal if you are on Windows.
 
-   ```bash
-   ./HorizonLang ../examples/hello.hl
-   ```
+1. **Create a `.hl` File**
 
-3. Choose your target compiler when prompted:
-    - `1` for Python
-    - `2` for C++
+   Create a `.hl` file with your HorizonLang code, or use examples from the `examples` folder.
 
-4. If you choose Python, the compiler will generate and run `output.py`. For C++, it will build and execute a binary using the generated `output.cpp`.
+2. **Run the Compiler**
+
+   Run the compiler with your file as an argument (ensure you are in the `build` directory):
+
+    ```bash
+    ./HorizonLang ../examples/hello.hl
+    ```
+
+3. **Choose Your Target Compiler**
+
+   When prompted, select your target compiler:
+   - `1` for Python
+   - `2` for C++
+
+4. **Execute the Generated Code**
+
+   - **Python**: The compiler will transpile and run `output.py`.
+   - **C++**: The compiler will transpile `output.cpp`, build it, and execute the resulting binary.
+
+5. **Optional: View the Transpiled Files**
+
+   After compilation, you can view the generated Python or C++ files in two ways:
+
+   - **Using the Terminal**:
+
+     While in the `build` directory, use the `cat` command to display the contents of the generated file:
+
+     ```bash
+     cat output.py   # For Python
+     ```
+
+     ```bash
+     cat output.cpp  # For C++
+     ```
+
+   - **Using a Code Editor**:
+
+     Navigate to the `build` directory of the project in your code editor (e.g., VS Code, Sublime Text) to browse and inspect the generated `output.py` or `output.cpp` files visually.
+
+6. **Optional: View the Abstract Syntax Tree (AST) Structure**
+
+   To see the AST structure of your HorizonLang program:
+
+   - **Uncomment AST Printing Lines**:
+
+     Open `main.cpp` and uncomment lines 145 and 146:
+
+     ```cpp
+     // Uncomment lines below to see AST Structure
+     // std::cout << "\nAST structure:" << std::endl;
+     // ASTPrinter::printAST(program);
+     ```
+
+   - **Rebuild and Run**:
+
+     Rebuild the project and run the compiler again to visualize the AST structure:
+
+     ```bash
+     make
+     ./HorizonLang ../examples/hello.hl
+     ```
+
+     This will print the AST structure to the console, providing a detailed view of the parsed program.
 
 ---
 
@@ -100,26 +229,26 @@ make
 
 Here’s an example of compiling and running a Horizon Lang program:
 
-1. Create a program `examples/example.hl`:
+1. **Create a program `examples/example.hl`:**
 
-   ```horizon
-   fx main() {
-       int x = 10;
-       print("Value of x: " + STR(x));
-   }
-   ```
+    ```horizon
+    fx main() {
+        int x = 10;
+        print("Value of x: " + STR(x));
+    }
+    ```
 
-2. Run the compiler (make sure you are in the build directory):
+2. **Run the Compiler (make sure you are in the build directory):**
 
-   ```bash
-   ./HorizonLang ../examples/example.hl
-   ```
+    ```bash
+    ./HorizonLang ../examples/example.hl
+    ```
 
-3. Choose `1` to generate and run Python code. The output will be:
+3. **Choose `1` to generate and run Python code. The output will be:**
 
-   ```plaintext
-   Value of x: 10
-   ```
+    ```plaintext
+    Value of x: 10
+    ```
 
 ---
 
@@ -154,4 +283,4 @@ This project was inspired by the desire to explore compiler design and the intri
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE.md) file for details.
