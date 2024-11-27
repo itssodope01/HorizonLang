@@ -22,7 +22,7 @@ This repository provides all the necessary components to build, extend, and expe
 
 ## Grammar
 
-The full grammar for Horizon Lang can be found in the [GRAMMARS.md](./GRAMMARS.md) file. It includes detailed syntax definitions for statements, expressions, and type systems.
+The full grammar for Horizon Lang can be found in the [GRAMMARS.md](./GRAMMARS.md) file. It includes detailed syntax definitions and simple basic example codes for statements, expressions, and type systems.
 
 ---
 
@@ -33,7 +33,8 @@ Examples of Horizon Lang programs are available in the [examples](./examples) fo
 - Variable declarations
 - Control flow statements
 - Function definitions and calls
-- List manipulations
+- List and String manipulations
+- Built-in functions and methods
 - Error handling with `try`-`catch`
 
 **Example `hello.hl`:**
@@ -115,7 +116,7 @@ Once WSL is set up, you'll need to install the necessary development tools insid
     sudo apt install python3
     ```
 
-   - **Verify Installations**:
+4.  **Verify Installations**:
        ```bash
        git --version
        cmake --version
@@ -158,8 +159,13 @@ Once WSL is set up, you'll need to install the necessary development tools insid
 1. **Create a `.hl` File**
 
    Create a `.hl` file with your HorizonLang code, or use examples from the `examples` folder.
+   
+   Run this command from build directory to see all available example files:
+    ```bash
+    ls ../examples # shows all examples
+    ```
 
-2. **Run the Compiler**
+3. **Run the Compiler**
 
    Run the compiler with your file as an argument (ensure you are in the `build` directory):
 
@@ -167,18 +173,18 @@ Once WSL is set up, you'll need to install the necessary development tools insid
     ./HorizonLang ../examples/Hello.hl
     ```
 
-3. **Choose Your Target Compiler**
+4. **Choose Your Target Compiler**
 
    When prompted, select your target compiler:
    - `1` for Python
    - `2` for C++
 
-4. **Execute the Generated Code**
+5. **Execute the Generated Code**
 
    - **Python**: The compiler will transpile and run `output.py`.
    - **C++**: The compiler will transpile `output.cpp`, build it, and execute the resulting binary.
 
-5. **Optional: View the Transpiled Files**
+6. **Optional: View the Transpiled Files**
 
    After compilation, you can view the generated Python or C++ files in two ways:
 
@@ -203,7 +209,7 @@ Once WSL is set up, you'll need to install the necessary development tools insid
      ```
 
 
-6. **Optional: View the Abstract Syntax Tree (AST) Structure**
+7. **Optional: View the Abstract Syntax Tree (AST) Structure**
 
    To see the AST structure of your HorizonLang program:
 
@@ -234,25 +240,37 @@ Once WSL is set up, you'll need to install the necessary development tools insid
 
 Here’s an example of compiling and running a Horizon Lang program:
 
-1. **Create a program `examples/example.hl`:**
+1. **Create a program `Program.hl`:**
 
     ```horizon
-    fx main() {
-        int x = 10;
-        print("Value of x: " + STR(x));
+    fx multiply(int a, int b) {
+        int mul = a * b;
+        return mul;
     }
+
+    int num1 = INT(input("Enter First number: "));
+    int num2 = INT(input("Enter Second number: "));
+    int result = multiply(num1,num2);
+    
+    print("Multiplication result: " + STR(result));
     ```
 
 2. **Run the Compiler (make sure you are in the build directory):**
 
     ```bash
-    ./HorizonLang ../examples/example.hl
+    ./HorizonLang "path to your Program.hl"
+    ```
+    For exapmle, we run `Factorial.hl` available in the examples directory:
+   ```bash
+    ./HorizonLang ../examples/Factorial.hl
     ```
 
-3. **Choose `1` to generate and run Python code. The output will be:**
+3. **Choose `1` to generate and run Python code. The output for `Program.hl` will be:**
 
     ```plaintext
-    Value of x: 10
+    Enter First number: 3
+    Enter Second number: 2
+    Multiplication result: 6
     ```
 
 ---
