@@ -419,6 +419,23 @@ void PythonCodeGen::generateFunctionCall(const std::shared_ptr<FunctionCall>& ca
                 output << " ** ";
                 generateExpression(call->arguments[0]);  // Exponent
                 output << ")";
+        } // New method implementations
+        else if (methodName == "fact" && call->arguments.empty()) {
+            // a.fact() -> math.factorial(a)
+            output << "math.factorial(";
+            generateExpression(memberAccess->object);
+            output << ")";
+        }
+        else if (methodName == "isEven" && call->arguments.empty()) {
+            // a.isEven() -> (a % 2 == 0)
+            output << "(";
+            generateExpression(memberAccess->object);
+            output << " % 2 == 0)";
+        }
+        else if (methodName == "toBinary" && call->arguments.empty()) {
+            output << "bin(";
+            generateExpression(memberAccess->object);
+            output << ")[2:]";
         } else if (methodName == "sqrt" || methodName == "power") {
             // math.sqrt(x) or math.pow(x, y)
             output << "math." ;

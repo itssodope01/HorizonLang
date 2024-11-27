@@ -34,7 +34,7 @@ fx factorial_iterative(int n) {
 }
 
 @ Main program
-int choice = INT(input("Choose the factorial method:\n1. Recursive\n2. Stack-based\n3. Iterative\nEnter your choice (1, 2, or 3): "));
+int choice = INT(input("Choose the factorial method:\n1. Recursive\n2. Stack-based\n3. Iterative\n4. Built-in fact()\nEnter your choice (1, 2, 3, or 4): "));
 
 int number = INT(input("Enter the number to calculate its factorial: "));
 int factorial_result;
@@ -48,6 +48,12 @@ if (choice == 1) {
 } elseif (choice == 3) {
     factorial_result = factorial_iterative(number);
     print("Factorial of " + STR(number) + " using iteration is " + STR(factorial_result));
+} elseif (choice == 4) {
+
+    @ Built-in Method
+    factorial_result = number.fact();
+    print("Factorial of " + STR(number) + " using the built-in fact() is " + STR(factorial_result));
+
 } else {
     print("Invalid choice. Please run the program again.");
 }

@@ -631,6 +631,30 @@ TypePtr SemanticAnalyzer::checkFunctionCall(const std::shared_ptr<FunctionCall>&
                 }
                 return std::make_shared<Type>(Type::Kind::INT);
             }
+
+            if (methodName == "fact") {
+                // `concat` requires exactly one string argument
+                if (funcCall->arguments.size() != 0) {
+                    addError("Method `fact` expects no argument.");
+                }
+                return std::make_shared<Type>(Type::Kind::INT);
+            }
+
+            if (methodName == "isEven") {
+                // `concat` requires exactly one string argument
+                if (funcCall->arguments.size() != 0) {
+                    addError("Method `isEven` expects no argument.");
+                }
+                return std::make_shared<Type>(Type::Kind::BOOL);
+            }
+
+            if (methodName == "toBinary") {
+                // `concat` requires exactly one string argument
+                if (funcCall->arguments.size() != 0) {
+                    addError("Method `toBinary` expects no argument.");
+                }
+                return std::make_shared<Type>(Type::Kind::INT);
+            }
         }
         if (objectType->kind == Type::Kind::MATHOBJECT) {
             std::string methodName = memberAccess->memberName;

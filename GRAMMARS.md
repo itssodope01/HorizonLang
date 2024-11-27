@@ -475,14 +475,14 @@ float absFloat = Math.abs(-3.14); @ Output: 3.14
 
 ---
 
-#### **Base Type Methods**
+#### **Built-in Base Type Methods**
 
 ```ebnf
 BaseTypeMethodCall  ::= ( IdentifierReference | BaseLiteral ) '.' BaseTypeMethodName '(' [ ArgumentList ] ')'
 
 BaseTypeMethodName  ::= IntMethodName | FloatMethodName | StringMethodName | BoolMethodName
 
-IntMethodName       ::= power       (* E.g., intVar.power(exponent) *)
+IntMethodName       ::= power, fact, toBinary, isEven
 FloatMethodName     ::=             
 StringMethodName    ::=             (* Already defined in String Methods *)
 BoolMethodName      ::=             
@@ -493,8 +493,19 @@ BoolMethodName      ::=
 **Example:**
 
 ```horizonlang
-int baseValue = 2;
-int result = baseValue.power(3); @ Output: 8
+int baseValue = 3;
+
+@ power method
+int result = baseValue.power(2); @ Output: 9
+
+@ fact method
+int factorial = baseValue.fact(); @ Output: 6
+
+@toBinary method
+int bin = baseValue.toBinary(); @ Output: 11
+
+@isEven method
+bool check = baseValue.isEven(); @ Output: False
 ```
 
 ---

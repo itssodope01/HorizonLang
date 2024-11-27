@@ -427,6 +427,21 @@ void CppCodeGen::generateExpression(const ExprPtr& expr) {
                 codeStream << "std::abs(";
                 generateExpression(funcCall->arguments[0]);
                 codeStream << ")";
+            } if (memberAccess->memberName == "fact") {
+                // Factorial
+                codeStream << "([&]() { return static_cast<int>(std::tgamma(";
+                generateExpression(memberAccess->object); // `a`
+                codeStream << "+ 1)); })()";
+            } else if (memberAccess->memberName == "isEven") {
+                // Check if even
+                codeStream << "([&]() { return (";
+                generateExpression(memberAccess->object); // `a`
+                codeStream << " % 2 == 0); })()";
+            } else if (memberAccess->memberName == "toBinary") {
+                // Convert to binary and return as int
+                codeStream << "([&]() { std::string binary; int n = ";
+                generateExpression(memberAccess->object); // e.g., 'a'
+                codeStream << "; do { binary = std::to_string(n % 2) + binary; n /= 2; } while (n > 0); return static_cast<int>(std::stol(binary)); })()";
             } else {
                 // Other member functions
             }

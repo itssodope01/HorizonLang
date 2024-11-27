@@ -1,10 +1,35 @@
-int num = INT(input("Enter a decimal number: "));
-string binary = "";
+@ Program to convert decimal to binary using either built-in function or implemented method
 
-while (num > 0) {
-    int remainder = num % 2;
-    binary = STR(remainder) + binary;
-    num = num / 2;
+int choice = 0;
+
+while (choice != 1 and choice != 2) {
+    print("Choose a method for binary conversion:");
+    print("1. Use built-in method");
+    print("2. Use custom implementation");
+    choice = INT(input("Enter your choice (1 or 2): "));
+    if (choice != 1 and choice != 2) {
+        print("Invalid choice! Please enter 1 or 2.");
+    }
 }
 
-print("The binary representation is: " + binary);
+@ Input the decimal number
+int num = INT(input("Enter a decimal number: "));
+
+if (choice == 1) {
+
+    @ Using built-in method
+    int binary = num.toBinary();
+    print("The binary representation using the built-in method is: " + STR(binary));
+
+} elseif (choice == 2) {
+
+    @ Using custom implementation
+    string binary = "";
+    while (num > 0) {
+        int remainder = num % 2;
+        binary = STR(remainder) + binary;
+        num = num / 2;
+    }
+    print("The binary representation using custom implementation is: " + binary);
+
+}
