@@ -270,7 +270,7 @@ Here’s an example of compiling and running a Horizon Lang program:
 4. **Run the Compiler (make sure you are in the build directory):**
 
     ```bash
-    ./HorizonLang ../examples/Program.hl"
+    ./HorizonLang ../examples/Program.hl
     ```
 
 5. **Choose `1` to generate and run Python code. The output for `Program.hl` will be:**
