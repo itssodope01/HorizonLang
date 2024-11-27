@@ -1,0 +1,170 @@
+/@ Complex Program: Mathematical Expression Evaluator @/
+
+@ Function to check if a character is an operator
+fx is_operator(string token) {
+    return token == "+" or token == "-" or token == "*" or token == "/";
+}
+
+@ Function to check if a string is numeric
+fx is_numeric(string token) {
+    for (i, 0, token.length()) {
+        string ch = token.substring(i, i + 1);
+        if (ch < "0" or ch > "9") {
+            return false;
+        }
+    }
+    return true;
+}
+
+@ Function to validate tokens
+fx validate_tokens(list<string> tokens) {
+    if (tokens.length() == 0) {
+        print("Error: Expression is empty.");
+        return false;
+    }
+
+    @ Ensure the first and last tokens are valid
+    if (is_operator(tokens[0]) or is_operator(tokens[tokens.length() - 1])) {
+        print("Error: Expression cannot start or end with an operator.");
+        return false;
+    }
+
+    @ Check for consecutive operators and invalid tokens
+    for (i, 0, tokens.length()) {
+        if (is_operator(tokens[i]) and i > 0 and is_operator(tokens[i - 1])) {
+            print("Error: Consecutive operators found: " + tokens[i - 1] + tokens[i]);
+            return false;
+        }
+
+        if (!is_operator(tokens[i]) and !is_numeric(tokens[i])) {
+            print("Error: Invalid token found: " + tokens[i]);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+@ Function to get operator precedence
+fx precedence(string optr) {
+    if (optr == "+" or optr == "-") {
+        return 1;
+    } elseif (optr == "*" or optr == "/") {
+        return 2;
+    }
+    return 0; @ Invalid optr
+}
+
+@ Function to perform arithmetic operations
+fx perform_operation(int num1, int num2, string optr) {
+    if (optr == "+") {
+        return num1 + num2;
+    } elseif (optr == "-") {
+        return num1 - num2;
+    } elseif (optr == "*") {
+        return num1 * num2;
+    } elseif (optr == "/") {
+        if (num2 == 0) {
+            print("Error: Division by zero.");
+            return 0; @ Return zero for safe handling
+        }
+        return num1 / num2;
+    }
+    return 0; @ Fallback, should not be reached
+}
+
+@ Recursive function to evaluate an expression with precedence
+fx evaluate_expression(list<string> tokens) {
+    if (tokens.length() == 1) {
+        return INT(tokens[0]); @ Base case: single number left
+    }
+
+    @ Find the operator with the lowest precedence
+    int min_precedence = 999;
+    int operator_index = -1;
+
+    for (i, 0, tokens.length()) {
+        if (is_operator(tokens[i])) {
+            int current_precedence = precedence(tokens[i]);
+            if (current_precedence <= min_precedence) {
+                min_precedence = current_precedence;
+                operator_index = i;
+            }
+        }
+    }
+
+    if (operator_index == -1) {
+        return 0; @ Invalid state, should not be reached
+    }
+
+    @ Split tokens into left and right parts
+    list<string> left_tokens = [];
+    for (i, 0, operator_index) {
+        left_tokens.append(tokens[i]);
+    }
+
+    list<string> right_tokens = [];
+    for (i, operator_index + 1, tokens.length()) {
+        right_tokens.append(tokens[i]);
+    }
+
+    @ Evaluate left and right expressions recursively
+    int left_result = evaluate_expression(left_tokens);
+    int right_result = evaluate_expression(right_tokens);
+
+    @ Perform the operation
+    return perform_operation(left_result, right_result, tokens[operator_index]);
+}
+
+@ Tokenize an input string into numbers and operators
+fx tokenize(string expression) {
+    expression = expression.sub(" ", ""); @ Skip spaces
+    list<string> tokens = [];
+    string current_token = "";
+
+    for (i, 0, expression.length()) {
+        string ch = expression.substring(i, i + 1);
+
+        if (is_operator(ch)) {
+            if (current_token != "") {
+                tokens.append(current_token);
+                current_token = "";
+            }
+            tokens.append(ch);
+        } else {
+            current_token = current_token.concat(ch);
+        }
+    }
+
+    if (current_token != "") {
+        tokens.append(current_token);
+    }
+
+    return tokens;
+}
+
+@ Main Program
+fx main() {
+    print("Welcome to the Mathematical Expression Evaluator!");
+    string input_expression = input("Enter a mathematical expression (e.g., 3 + 5 * 2 - 8 / 4): ");
+    print("Expression entered: " + input_expression);
+
+    @ Tokenize the input
+    list<string> tokens = tokenize(input_expression);
+    print("Tokens: ");
+    for (i, 0, tokens.length()) {
+        print(tokens[i]);
+    }
+
+    @ Validate tokens
+    if (!validate_tokens(tokens)) {
+        print("Invalid expression. Exiting.");
+        return; @ Stop further execution on validation failure
+    }
+
+    @ Evaluate the expression
+    int result = evaluate_expression(tokens);
+    print("Result: " + STR(result));
+}
+
+main();

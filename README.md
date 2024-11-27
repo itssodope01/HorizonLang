@@ -164,7 +164,7 @@ Once WSL is set up, you'll need to install the necessary development tools insid
    Run the compiler with your file as an argument (ensure you are in the `build` directory):
 
     ```bash
-    ./HorizonLang ../examples/hello.hl
+    ./HorizonLang ../examples/Hello.hl
     ```
 
 3. **Choose Your Target Compiler**
@@ -223,7 +223,7 @@ Once WSL is set up, you'll need to install the necessary development tools insid
 
      ```bash
      make
-     ./HorizonLang ../examples/hello.hl
+     ./HorizonLang ../examples/Hello.hl
      ```
 
      This will print the AST structure to the console, providing a detailed view of the parsed program.

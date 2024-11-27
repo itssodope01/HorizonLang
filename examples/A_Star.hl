@@ -1,0 +1,196 @@
+/@ Complex Program: A* Pathfinding Algorithm @/
+
+@ Constants for grid dimensions and symbols
+const int ROWS = 5;
+const int COLS = 5;
+const string WALL = "#";
+const string PATH = ".";
+const string START = "S";
+const string END = "E";
+const string VISITED = "*";
+
+@ Maze Representation (Flat List for 2D grid)
+list<string> maze = [
+    ".", "S", ".", "#", ".",
+    ".", "#", ".", "#", ".",
+    ".", "#", ".", "#", ".",
+    ".", ".", ".", "#", ".",
+    ".", "#", ".", ".", "E"
+];
+
+@ Utility function to calculate index for 2D grid in a 1D list
+fx get_index(int row, int col) {
+    return row * COLS + col;
+}
+
+@ Manhattan distance heuristic
+fx manhattan_distance(int row1, int col1, int row2, int col2) {
+    return Math.abs(row1 - row2) + Math.abs(col1 - col2);
+}
+
+@ Check if a cell is valid for movement
+fx is_valid_cell(int row, int col) {
+    return row >= 0 and row < ROWS and col >= 0 and col < COLS and maze[get_index(row, col)] != WALL;
+}
+
+@ Print the current maze
+fx display_maze() {
+    for (row, 0, ROWS) {
+        string row_str = "";
+        for (col, 0, COLS) {
+            row_str = row_str.concat(maze[get_index(row, col)] + " ");
+        }
+        print(row_str);
+    }
+}
+
+@ Reconstruct the path from end to start
+fx reconstruct_path(list<int> came_from, int end_row, int end_col) {
+    int current_row = end_row;
+    int current_col = end_col;
+
+    while (true) {
+        int current_index = get_index(current_row, current_col);
+        if (maze[current_index] == START) {
+            endloop;
+        }
+        maze[current_index] = VISITED;
+
+        int previous_index = came_from[current_index];
+        current_row = previous_index / COLS;
+        current_col = previous_index % COLS;
+    }
+}
+
+@ Find the start and end points in the maze
+fx find_points() {
+    list<int> points = [-1, -1, -1, -1]; @ [start_row, start_col, end_row, end_col]
+    for (row, 0, ROWS) {
+        for (col, 0, COLS) {
+            if (maze[get_index(row, col)] == START) {
+                points[0] = row;
+                points[1] = col;
+            } elseif (maze[get_index(row, col)] == END) {
+                points[2] = row;
+                points[3] = col;
+            }
+        }
+    }
+    return points;
+}
+
+@ A* Algorithm Implementation
+fx a_star_pathfinding() {
+    list<int> start_end_points = find_points();
+    int start_row = start_end_points[0];
+    int start_col = start_end_points[1];
+    int end_row = start_end_points[2];
+    int end_col = start_end_points[3];
+
+    if (start_row == -1 or end_row == -1) {
+        print("Error: Start or End point not found!");
+        return false;
+    }
+
+    @ Open and closed sets
+    list<int> open_set = [get_index(start_row, start_col)];
+    list<int> came_from = []; @ Keeps track of the path
+    for (i, 0, ROWS * COLS) {
+        came_from.append(-1);
+    }
+
+    list<int> g_score = [];
+    list<int> f_score = [];
+    for (i, 0, ROWS * COLS) {
+        g_score.append(9999); @ Initialize with a large number
+        f_score.append(9999);
+    }
+
+    int start_index = get_index(start_row, start_col);
+    g_score[start_index] = 0;
+    f_score[start_index] = manhattan_distance(start_row, start_col, end_row, end_col);
+
+    while (open_set.length() > 0) {
+        @ Find the cell in open_set with the lowest f_score
+        int current = open_set[0];
+        for (i, 1, open_set.length()) {
+            if (f_score[open_set[i]] < f_score[current]) {
+                current = open_set[i];
+            }
+        }
+
+        @ If the current cell is the end point, reconstruct path
+        if (current == get_index(end_row, end_col)) {
+            reconstruct_path(came_from, end_row, end_col);
+            return true;
+        }
+
+        @ Remove current from open_set
+        list<int> new_open_set = [];
+        for (i, 0, open_set.length()) {
+            if (open_set[i] != current) {
+                new_open_set.append(open_set[i]);
+            }
+        }
+        open_set = new_open_set;
+
+        @ Get current row and column
+        int current_row = current / COLS;
+        int current_col = current % COLS;
+
+        @ Explore neighbors
+        list<int> row_moves = [-1, 0, 1, 0];
+        list<int> col_moves = [0, 1, 0, -1];
+        for (i, 0, 4) {
+            int neighbor_row = current_row + row_moves[i];
+            int neighbor_col = current_col + col_moves[i];
+            int neighbor_index = get_index(neighbor_row, neighbor_col);
+
+            if (!is_valid_cell(neighbor_row, neighbor_col)) {
+                next;
+            }
+
+            @ Calculate tentative g_score
+            int tentative_g_score = g_score[current] + 1;
+
+            if (tentative_g_score < g_score[neighbor_index]) {
+                @ This path is better, record it
+                came_from[neighbor_index] = current;
+                g_score[neighbor_index] = tentative_g_score;
+                f_score[neighbor_index] = g_score[neighbor_index] + manhattan_distance(neighbor_row, neighbor_col, end_row, end_col);
+
+                @ Add neighbor to open_set if not already there
+                bool in_open_set = false;
+                for (j, 0, open_set.length()) {
+                    if (open_set[j] == neighbor_index) {
+                        in_open_set = true;
+                        endloop;
+                    }
+                }
+                if (!in_open_set) {
+                    open_set.append(neighbor_index);
+                }
+            }
+        }
+    }
+
+    return false; @ No path found
+}
+
+@ Main Program
+fx A_Star() {
+    print("\nWelcome to the A* Pathfinding Program!\n");
+    print("Initial Maze:");
+    display_maze();
+
+    if (a_star_pathfinding()) {
+        print("Path found! Final Maze:");
+        display_maze();
+    } else {
+        print("No path found.");
+    }
+
+    print("\nEdit initial Maze in the code to see different results!\n");
+}
+
+A_Star();

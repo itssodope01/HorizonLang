@@ -1,0 +1,164 @@
+/@
+
+**Artificial Neural Network (ANN) Simulation**
+**Multi-Gate Perceptron Simulator**
+
+Welcome to the simulation of a single-layer perceptron—a fundamental building block of artificial intelligence!
+This program allows you to explore the power of neural networks by simulating logical gates, the foundation of computational logic.
+
+**How It Works:**
+- The perceptron uses the **step activation function**, which outputs `1` or `0` based on a weighted sum of inputs.
+- The program trains the perceptron using supervised learning:
+  - Adjusts weights and bias iteratively to minimize prediction errors.
+  - Stops training once the perceptron learns the desired gate behavior or after a maximum number of epochs.
+- After training, the perceptron is tested on all possible input combinations to verify its performance.
+
+@/
+
+
+@ Activation Function: Step Function
+fx activation(float inpt) {
+    if (inpt >= 0) {
+        return 1; @ Activated state
+    }
+    return 0; @ Non-activated state
+}
+
+@ Perceptron Training Algorithm
+fx train_perceptron(list<list<float>> inputs, list<int> labels, int epochs, float learning_rate) {
+    int num_features = inputs[0].length();
+    list<float> weights = [];
+    for (i, 0, num_features) {
+        weights.append(0.0); @ Initialize weights to 0
+    }
+    float bias = 0.0; @ Initialize bias
+
+    print("Training Perceptron...");
+
+    for (epoch, 1, epochs + 1) {
+        int total_error = 0;
+
+        for (i, 0, inputs.length()) {
+            list<float> inpt = inputs[i];
+            int label = labels[i];
+
+            @ Calculate the weighted sum
+            float weighted_sum = bias;
+            for (j, 0, num_features) {
+                weighted_sum = weighted_sum + (weights[j] * inpt[j]);
+            }
+
+            @ Apply activation function
+            int prediction = activation(weighted_sum);
+
+            @ Compute the error
+            int error = label - prediction;
+
+            @ Update weights and bias
+            for (j, 0, num_features) {
+                weights[j] = weights[j] + (learning_rate * error * inpt[j]);
+            }
+            bias = bias + (learning_rate * error);
+
+            total_error = total_error + Math.abs(error);
+        }
+
+        print("Epoch " + STR(epoch) + ": Total Error = " + STR(total_error));
+
+        @ Stop training if there are no errors
+        if (total_error == 0) {
+            endloop;
+        }
+    }
+
+    list<float> result = weights;
+    result.append(bias); @ Append bias as the last element
+    return result;
+}
+
+@ Perceptron Prediction
+fx predict_perceptron(list<float> weights, float bias, list<float> inpt) {
+    float weighted_sum = bias;
+    for (i, 0, inpt.length()) {
+        weighted_sum = weighted_sum + (weights[i] * inpt[i]);
+    }
+    return activation(weighted_sum);
+}
+
+@ Main Program
+fx main() {
+    print("Welcome to the Multi-Gate Perceptron Simulator!");
+
+    print("Choose a logic gate to simulate:");
+    print("1. AND");
+    print("2. OR");
+    print("3. NOT");
+    print("4. NAND");
+    print("5. NOR");
+
+    int choice = INT(input("Enter your choice (1-5): "));
+
+    list<list<float>> training_inputs = [];
+    list<int> training_labels = [];
+
+    if (choice == 1) { @ AND Gate
+        training_inputs = [[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]];
+        training_labels = [0, 0, 0, 1];
+        print("Simulating AND Gate...");
+    } elseif (choice == 2) { @ OR Gate
+        training_inputs = [[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]];
+        training_labels = [0, 1, 1, 1];
+        print("Simulating OR Gate...");
+    } elseif (choice == 3) { @ NOT Gate
+        training_inputs = [[0.0], [1.0]];
+        training_labels = [1, 0];
+        print("Simulating NOT Gate...");
+    } elseif (choice == 4) { @ NAND Gate
+        training_inputs = [[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]];
+        training_labels = [1, 1, 1, 0];
+        print("Simulating NAND Gate...");
+    } elseif (choice == 5) { @ NOR Gate
+        training_inputs = [[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]];
+        training_labels = [1, 0, 0, 0];
+        print("Simulating NOR Gate...");
+    } else {
+        print("Invalid choice! Exiting.");
+        return;
+    }
+
+    @ Set training parameters
+    int epochs = 20;
+    float learning_rate = 0.1;
+
+    @ Train the perceptron
+    list<float> result = train_perceptron(training_inputs, training_labels, epochs, learning_rate);
+
+    @ Extract weights and bias from result
+    list<float> weights = [];
+    for (i, 0, result.length() - 1) {
+        weights.append(result[i]);
+    }
+    float bias = result[result.length() - 1];
+
+    @ Display trained weights and bias
+    print("Trained Weights: ");
+    for (i, 0, weights.length()) {
+        print("Weight " + STR(i) + ": " + STR(weights[i]));
+    }
+    print("Trained Bias: " + STR(bias));
+
+    @ Test the perceptron
+    print("Testing the Perceptron...");
+    for (i, 0, training_inputs.length()) {
+        list<float> inpt = training_inputs[i];
+        int predicted = predict_perceptron(weights, bias, inpt);
+        string input_str = "[" + STR(inpt[0]);
+        for (j, 1, inpt.length()) {
+            input_str = input_str + ", " + STR(inpt[j]);
+        }
+        input_str = input_str + "]";
+        print("Input: " + input_str + " -> Prediction: " + STR(predicted));
+    }
+}
+
+main();

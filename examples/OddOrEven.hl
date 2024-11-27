@@ -1,0 +1,10 @@
+print("Enter a number to check if it is even or odd.");
+
+int number;
+number = INT(input("Enter the number: "));
+
+if (number.isEven()) {
+    print(STR(number) + " is even.");
+} else {
+    print(STR(number) + " is odd.");
+}
