@@ -228,6 +228,7 @@ Once WSL is set up, you'll need to install the necessary development tools insid
      Rebuild the project and run the compiler again to visualize the AST structure:
 
      ```bash
+     # make sure you are in the build directy 
      make
      ./HorizonLang ../examples/Hello.hl
      ```
