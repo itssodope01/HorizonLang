@@ -240,7 +240,14 @@ Once WSL is set up, you'll need to install the necessary development tools insid
 
 Here’s an example of compiling and running a Horizon Lang program:
 
-1. **Create a program `Program.hl`:**
+1. **Create a program  `Program.hl` in the examples directory:**
+
+    ```bash
+    # Assuming you are still in the build directory
+    nano ../examples/Program.hl
+    ```
+
+2. **Write your program in the `nano` editor or paste the following example code:**
 
     ```horizon
     fx multiply(int a, int b) {
@@ -254,18 +261,19 @@ Here’s an example of compiling and running a Horizon Lang program:
     
     print("Multiplication result: " + STR(result));
     ```
+3. **Save the file**
+    To save the file in the `nano` editor:
+    1. Press `Ctrl + X`.
+    2. Press `Y` to confirm.
+    3. Press `Enter` to finalize.
 
-2. **Run the Compiler (make sure you are in the build directory):**
+4. **Run the Compiler (make sure you are in the build directory):**
 
     ```bash
-    ./HorizonLang "path to your Program.hl"
-    ```
-    For exapmle, we run `Factorial.hl` available in the examples directory:
-   ```bash
-    ./HorizonLang ../examples/Factorial.hl
+    ./HorizonLang ../examples/Program.hl"
     ```
 
-3. **Choose `1` to generate and run Python code. The output for `Program.hl` will be:**
+5. **Choose `1` to generate and run Python code. The output for `Program.hl` will be:**
 
     ```plaintext
     Enter First number: 3
